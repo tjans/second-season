@@ -1,0 +1,41 @@
+// foundation
+import usePageTitle from '@/hooks/usePageTitle'
+import ContentWrapper from "@/components/ContentWrapper";
+import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { db } from '@/db';
+
+// components
+
+
+export default function Home() {
+
+  useEffect(() => {
+     const foo = async () => {
+      // this is here to force a query to open the DB
+      let test = await db.expressGames.where("gameId").equals("foo").toArray();
+     }
+
+     foo();
+  }, []);
+
+  usePageTitle("Home");
+  //const [isNotAvailableModalOpen, setIsNotAvailableModalOpen] = useState(false);
+
+  return (
+    <>
+      <ContentWrapper>
+        <Link to={"/express/game-id-1"}>Express Game Home</Link>
+
+      </ContentWrapper>
+
+      {/* <ConfirmationModal
+        isModalOpen={isNotAvailableModalOpen}
+        showYes={false}
+        noText='Ok'
+        onReject={() => setIsNotAvailableModalOpen(false)}
+        title="Not available"
+        message="This is a modal message" /> */}
+    </>
+  );
+}

@@ -1,0 +1,45 @@
+expressGames (gameId, leagueId):
+    gameId
+    homeTeamId
+    awayTeamId,
+    leagueId: null for now
+
+    gameState: {
+        homeScore
+        awayScore,
+        currentZone,
+        segment,
+        possessionId
+        quarter
+    }
+
+teams (teamId):
+    teamId,
+    city,
+    mascot,
+    stadium,
+    finders {each finder is an object, min, max, playerId}:
+        {
+            rushingIn: [finder1, finder2...]
+            rushingOut: [finder1, finder2...]
+            shortPass: [finder1, finder2...]
+            mediumPass: [finder1, finder2...]
+            longPass: [finder1, finder2...]
+        }
+
+players (playerId, position):
+    playerId,
+    firstName,
+    lastName,
+    position,
+    teamId
+
+
+stats:
+    statId
+    gameId
+    teamId
+    zones
+    yards (10 or 15)
+    gameState (after play completion)
+    
