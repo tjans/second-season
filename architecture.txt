@@ -1,3 +1,10 @@
+Coin Flip
+Kickoff
+Kickoff return
+
+
+
+
 expressGames (gameId, leagueId):
     gameId
     homeTeamId

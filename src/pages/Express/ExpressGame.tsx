@@ -1,5 +1,6 @@
 // react
 import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // hooks
 import usePageTitle from '@/hooks/usePageTitle'
@@ -8,7 +9,7 @@ import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 
 // queries
-import { useExpressGame, useSaveGame } from '@/queries/expressGameQueries';
+import { useExpressGame, useSaveGame, useUndo } from '@/queries/expressGameQueries';
 import { useTeam } from '@/queries/teamQueries';
 import { useLogPlay, usePlayLogs } from '@/queries/playLogQueries';
 
@@ -22,9 +23,11 @@ import ButtonLink from '@/components/Elements/ButtonLink';
 export default function ExpressGame() {
   const { gameId } = useParams<{ gameId: string }>();
   if (!gameId) throw new Error("gameId is required");
+
+  const navigate = useNavigate();
   
-  // queries
-  const game = useExpressGame(gameId, { gcTime: 0 });
+  // queries - game is never garbage collected, always cached until invalidated
+  const game = useExpressGame(gameId, { staleTime: Infinity });
   const homeTeam = useTeam(game.data?.homeTeamId || "", { staleTime: Infinity });
   const awayTeam = useTeam(game.data?.awayTeamId || "", { staleTime: Infinity });
   const playLogs = usePlayLogs(gameId);
@@ -32,13 +35,12 @@ export default function ExpressGame() {
   // mutations
   const saveGameMutation = useSaveGame();
   const logPlayMutation = useLogPlay();
-
+  const useUndoMutation = useUndo();
 
   usePageTitle("Express Gameday");
 
-  const handleCoinFlip = (teamId: string) => {
-    // set possession, zone, game mode
-    
+  // functions
+  const handleCoinFlip = (teamId: string) => {    
     let coinTossWinner = teamId == game.data.awayTeamId ? awayTeam.data : homeTeam.data;
 
     let gameData = {...game.data};
@@ -56,16 +58,26 @@ export default function ExpressGame() {
     gameData.situation.possessionId = teamId;
     gameData.situation.mode = "KICKOFF";
     saveGameMutation.mutate(gameData);
+    navigate(`/express/game/${gameId}/kickoff`);
+  }
+
+  const handleUndo = () => {
+    if(confirm("Are you sure you want to undo the last action?")){
+      // delete the most recent play log for this game
+      // if there are no more play logs left, reset the game to pregame state
+      // invalidate log and game queries
+      useUndoMutation.mutate(game.data);
+    }
   }
 
   return (
     <>
       <ContentWrapper>
 
-        <table className="mb-6 w-60 border">
+        <table className="mb-6 w-full table-fixed border">
           <tbody>
             <tr>
-              <td className="p-2 font-bold pr-4 border border-black">Home:</td>
+              <td className="p-2 w-28 font-bold pr-4 border border-black">Home:</td>
               <td className="p-2 border border-black">{game.data.situation.homeScore}</td>
             </tr>
             <tr>
@@ -102,7 +114,7 @@ export default function ExpressGame() {
           </>
         }        
 
-        <Button onClick = {() => null} color="secondary">
+        <Button onClick = {handleUndo} color="secondary">
           Undo
         </Button>
 
@@ -111,10 +123,6 @@ export default function ExpressGame() {
             Kickoff
           </ButtonLink>
         }
-
-        {/* <Debug title="Express Game Data" data={game.data} />
-        <Debug title="Home Team Data" data={homeTeam.data} />
-        <Debug title="Away Team Data" data={awayTeam.data} /> */}
 
         {playLogs.data.map(log => {
           return <div key={log.logId}>{log.situation.minute}: {log.message}</div>

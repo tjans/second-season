@@ -2,6 +2,7 @@ import playLogService from "@/services/playLogService";
 import { PlayLog } from "@/types/PlayLog";
 import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { expressGameKeys } from "./expressGameQueries";
 
 // #region Keys
 export const playLogKeys = {

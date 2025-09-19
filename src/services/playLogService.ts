@@ -18,5 +18,13 @@ export default {
 
     logPlay: async (log: PlayLog): Promise<void> => {
         await db.playLogs.put(log);
-    }
+    },
+
+    deleteLastLog: async (gameId: string): Promise<void> => {
+        // get the most recent log for this game
+        let lastLog = await db.playLogs.where({ gameId }).sortBy('date');
+        if (lastLog.length === 0) return; // no logs to delete
+        let logToDelete = lastLog[lastLog.length - 1];
+        await db.playLogs.delete(logToDelete.logId);
+    }   
 };
