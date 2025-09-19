@@ -1,5 +1,4 @@
 // react
-import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 // hooks
@@ -9,28 +8,22 @@ import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 
 // queries
-import { useExpressGame, useSaveGame, useUndo } from '@/queries/expressGameQueries';
-import { useTeam } from '@/queries/teamQueries';
+import { useSaveGame, useUndo } from '@/queries/expressGameQueries';
 import { useLogPlay, usePlayLogs } from '@/queries/playLogQueries';
 
 // elements
 import Button from '@/components/Elements/Button';
 import ButtonLink from '@/components/Elements/ButtonLink';
+import useExpressGameTools from '@/hooks/useExpressGameTools';
 
 
 
 // This is the main entry point for a game
 export default function ExpressGame() {
-  const { gameId } = useParams<{ gameId: string }>();
-  if (!gameId) throw new Error("gameId is required");
-
-  const navigate = useNavigate();
   
-  // queries - game is never garbage collected, always cached until invalidated
-  const game = useExpressGame(gameId, { staleTime: Infinity });
-  const homeTeam = useTeam(game.data?.homeTeamId || "", { staleTime: Infinity });
-  const awayTeam = useTeam(game.data?.awayTeamId || "", { staleTime: Infinity });
-  const playLogs = usePlayLogs(gameId);
+  const expressGameTools = useExpressGameTools();
+  const navigate = useNavigate(); 
+  const playLogs = usePlayLogs(expressGameTools.gameId);
 
   // mutations
   const saveGameMutation = useSaveGame();
@@ -41,15 +34,15 @@ export default function ExpressGame() {
 
   // functions
   const handleCoinFlip = (teamId: string) => {    
-    let coinTossWinner = teamId == game.data.awayTeamId ? awayTeam.data : homeTeam.data;
+    let coinTossWinner = teamId == expressGameTools.awayTeam.teamId ? expressGameTools.awayTeam : expressGameTools.homeTeam;
 
-    let gameData = {...game.data};
+    let gameData = {...expressGameTools.game};
 
     logPlayMutation.mutate({      
-      situation: game.data.situation,
+      situation: expressGameTools.situation,
       message: `${coinTossWinner.abbreviation} wins the coin toss`,
       date: new Date().toISOString(),
-      gameId: game.data.gameId,
+      gameId: expressGameTools.gameId,
       yardsGained: null,
       teamId: coinTossWinner.teamId,
       logId: crypto.randomUUID()
@@ -58,7 +51,7 @@ export default function ExpressGame() {
     gameData.situation.possessionId = teamId;
     gameData.situation.mode = "KICKOFF";
     saveGameMutation.mutate(gameData);
-    navigate(`/express/game/${gameId}/kickoff`);
+    navigate(`/express/game/${expressGameTools.gameId}/kickoff`);
   }
 
   const handleUndo = () => {
@@ -66,7 +59,7 @@ export default function ExpressGame() {
       // delete the most recent play log for this game
       // if there are no more play logs left, reset the game to pregame state
       // invalidate log and game queries
-      useUndoMutation.mutate(game.data);
+      useUndoMutation.mutate( expressGameTools.game);
     }
   }
 
@@ -78,39 +71,39 @@ export default function ExpressGame() {
           <tbody>
             <tr>
               <td className="p-2 w-28 font-bold pr-4 border border-black">Home:</td>
-              <td className="p-2 border border-black">{game.data.situation.homeScore}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.homeScore}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Away:</td>
-              <td className="p-2 border border-black">{game.data.situation.awayScore}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.awayScore}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Zone:</td>
-              <td className="p-2 border border-black">{game.data.situation.currentZone}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.currentZone}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Minute:</td>
-              <td className="p-2 border border-black">{game.data.situation.minute}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.minute}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Possession:</td>
-              <td className="p-2 border border-black">{game.data.situation.possessionId}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.possessionId}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Quarter:</td>
-              <td className="p-2 border border-black">{game.data.situation.quarter}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.quarter}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Mode:</td>
-              <td className="p-2 border border-black">{game.data.situation.mode}</td>
+              <td className="p-2 border border-black">{expressGameTools.situation.mode}</td>
             </tr>
           </tbody>
         </table>
 
-        {game.data.situation.mode == "PREGAME" && 
+        {expressGameTools.situation.mode == "PREGAME" && 
           <>
-          <Button onClick={() => handleCoinFlip(awayTeam.data.teamId)}>{awayTeam.data.abbreviation}</Button>
-          <Button onClick={() => handleCoinFlip(homeTeam.data.teamId)}>{homeTeam.data.abbreviation}</Button>
+          <Button onClick={() => handleCoinFlip(expressGameTools.awayTeam.teamId)}>{expressGameTools.awayTeam.abbreviation}</Button>
+          <Button onClick={() => handleCoinFlip(expressGameTools.homeTeam.teamId)}>{expressGameTools.homeTeam.abbreviation}</Button>
           </>
         }        
 
@@ -118,8 +111,8 @@ export default function ExpressGame() {
           Undo
         </Button>
 
-        {game.data.situation.mode == "KICKOFF" && 
-          <ButtonLink to={`/express/game/${gameId}/kickoff`} className="mr-2 mb-2">
+        {expressGameTools.situation.mode == "KICKOFF" && 
+          <ButtonLink to={`/express/game/${expressGameTools.gameId}/kickoff`} className="mr-2 mb-2">
             Kickoff
           </ButtonLink>
         }
