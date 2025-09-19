@@ -1,10 +1,10 @@
-# Legends of Boxing
+# Second Season - Football Management Game
 
-A React TypeScript boxing management application built with modern web technologies.
+A React TypeScript football management application built with modern web technologies.
 
 ## Features
 
-- 🥊 Boxing fight management system
+- 🏈 Football game management system
 - 🎯 TypeScript with strict mode
 - 🌈 Tailwind CSS for styling
 - ⚡ Vite for fast development
