@@ -1,6 +1,7 @@
 Coin Flip
 Kickoff
 Kickoff return
+Figure out logging with what minute we're on and what minute the play happened at
 
 
 

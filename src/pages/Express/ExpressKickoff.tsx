@@ -3,14 +3,40 @@ import ContentWrapper from "@/components/ContentWrapper";
 import Button from '@/components/Elements/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import ButtonLink from '@/components/Elements/ButtonLink';
+import { useLogPlay } from '@/queries/playLogQueries';
+import { useSaveGame } from '@/queries/expressGameQueries';
+import { useNavigate } from 'react-router-dom';
 
 export default function ExpressKickoff() {
-  const {offenseTeam, gameId} = useExpressGameTools();
+  const {game, offenseTeam, defenseTeam, gameId, gameUrl} = useExpressGameTools();
   
+  const navigate = useNavigate();
   usePageTitle("Express Kickoff");
 
+  const saveGameMutation = useSaveGame();
+  const logPlayMutation = useLogPlay();
+
   const handleZoneSelect = (zone: number) => {
-    //
+    let gameData = {...game};
+
+    // Check for TD!!
+    gameData.situation.minute++;
+    gameData.situation.currentZone = zone;
+    gameData.situation.mode = "DRIVE";
+    gameData.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
+    saveGameMutation.mutate(gameData);
+
+    logPlayMutation.mutate({      
+      situation: game.situation,
+      message: `${defenseTeam.abbreviation} returns the kick to zone ${zone}`,
+      date: new Date().toISOString(),
+      gameId: game.gameId,
+      yardsGained: null,
+      teamId: defenseTeam.teamId,
+      logId: crypto.randomUUID()
+    });
+
+    navigate(gameUrl);
   }
 
   const handleFumble = () => {
