@@ -39,6 +39,8 @@ import {
 } from "react-router-dom";
 import ExpressGame from "./pages/Express/ExpressGame";
 import ExpressKickoff from "./pages/Express/ExpressKickoff";
+import ExpressPass from "./pages/Express/ExpressPass";
+import ExpressRun from "./pages/Express/ExpressRun";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -47,8 +49,10 @@ const router = createBrowserRouter(
       <Route path="/" element={<Layout />} errorElement={<ErrorPage />}>
         <Route index element={<Home />} />
         
-        <Route path="/express/:gameId" element={<ExpressGame  />} />
+        <Route path="/express/game/:gameId" element={<ExpressGame  />} />
         <Route path="/express/game/:gameId/kickoff" element={<ExpressKickoff />} />
+        <Route path="/express/game/:gameId/pass" element={<ExpressPass />} />
+        <Route path="/express/game/:gameId/run" element={<ExpressRun />} />
 
         <Route path="/members" element={<Members />} />
 

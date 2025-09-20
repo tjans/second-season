@@ -16,6 +16,6 @@ export type ExpressGameState = {
     minute: number;
     possessionId?: string | null;
     quarter?: 1 | 2 | 3 | 4 | "OT";
-    mode: "PREGAME" | "KICKOFF" | "DRIVE" | "EOH" | "EOR" | "FINAL" | "OT"; // end of half, end of regulation, etc
+    mode: "PREGAME" | "KICKOFF" | "TD" | "DRIVE" | "EOH" | "EOR" | "FINAL" | "OT"; // end of half, end of regulation, etc
 };
 

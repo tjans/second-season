@@ -17,14 +17,15 @@ export default function ExpressKickoff() {
   const logPlayMutation = useLogPlay();
 
   const handleZoneSelect = (zone: number) => {
-    let gameData = {...game};
+ let gameAfterPlay = {...game};
 
     // Check for TD!!
-    gameData.situation.minute++;
-    gameData.situation.currentZone = zone;
-    gameData.situation.mode = "DRIVE";
-    gameData.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
-    saveGameMutation.mutate(gameData);
+    let playMinute = game.situation.minute;  // store this so we can add it to the play log
+    gameAfterPlay.situation.minute++;
+    gameAfterPlay.situation.currentZone = zone;
+    gameAfterPlay.situation.mode = "DRIVE";
+    gameAfterPlay.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
+    saveGameMutation.mutate(gameAfterPlay);
 
     logPlayMutation.mutate({      
       situation: game.situation,
@@ -33,10 +34,11 @@ export default function ExpressKickoff() {
       gameId: game.gameId,
       yardsGained: null,
       teamId: defenseTeam.teamId,
-      logId: crypto.randomUUID()
+      logId: crypto.randomUUID(),
+      playMinute
     });
 
-    navigate(gameUrl);
+    navigate(gameUrl());
   }
 
   const handleFumble = () => {
@@ -60,7 +62,7 @@ export default function ExpressKickoff() {
         <div className="text-center">
           <div className="my-4 font-bold">or</div>
           <Button color="error" onClick={() => handleFumble()}>Zone 2 + Fumble</Button>
-          <ButtonLink to={`/express/${gameId}`} color="secondary" className="ml-2">Cancel</ButtonLink>
+          <ButtonLink to={gameUrl()} color="secondary" className="ml-2">Cancel</ButtonLink>
         </div>
       </ContentWrapper>
     </>

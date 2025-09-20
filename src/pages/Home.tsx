@@ -20,12 +20,11 @@ export default function Home() {
   }, []);
 
   usePageTitle("Home");
-  //const [isNotAvailableModalOpen, setIsNotAvailableModalOpen] = useState(false);
 
   return (
     <>
       <ContentWrapper>
-        <Link to={"/express/game-id-1"}>Express Game Home</Link>
+        <Link to={"/express/game/game-id-1"}>Express Game Home</Link>
 
       </ContentWrapper>
 

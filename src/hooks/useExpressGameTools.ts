@@ -14,7 +14,7 @@ const useExpressGameTools = () => {
 
       const offenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? homeTeam.data : awayTeam.data;
       const defenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? awayTeam.data : homeTeam.data;
-      const gameUrl = `/express/${gameId}`;
+      const gameUrl = (url:string = "") => `/express/game/${gameId}/${url}`;
 
     return {
         gameUrl,

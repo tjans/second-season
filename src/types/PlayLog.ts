@@ -7,6 +7,7 @@ export type PlayLog = {
     logId: string;
     gameId: string;
     situation: ExpressGameState;
+    playMinute: number;
     message: string;
     date: string; // ISO string
     yardsGained: number | null; // each zone is worth 10 or 15, so this stores how many yards gained/lost

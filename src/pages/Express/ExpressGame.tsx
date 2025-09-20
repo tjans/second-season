@@ -15,15 +15,15 @@ import { useLogPlay, usePlayLogs } from '@/queries/playLogQueries';
 import Button from '@/components/Elements/Button';
 import ButtonLink from '@/components/Elements/ButtonLink';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
-
+import { PlayLog } from '@/types/PlayLog';
 
 
 // This is the main entry point for a game
 export default function ExpressGame() {
   
-  const expressGameTools = useExpressGameTools();
+  const {game, awayTeam, homeTeam, gameId, gameUrl} = useExpressGameTools();
   const navigate = useNavigate(); 
-  const playLogs = usePlayLogs(expressGameTools.gameId);
+  const playLogs = usePlayLogs(gameId);
 
   // mutations
   const saveGameMutation = useSaveGame();
@@ -34,24 +34,33 @@ export default function ExpressGame() {
 
   // functions
   const handleCoinFlip = (teamId: string) => {    
-    let coinTossWinner = teamId == expressGameTools.awayTeam.teamId ? expressGameTools.awayTeam : expressGameTools.homeTeam;
+    let coinTossWinner = teamId == awayTeam.teamId ? awayTeam : homeTeam;
 
-    let gameData = {...expressGameTools.game};
+    let gameAfterPlay = {...game};
 
-    logPlayMutation.mutate({      
-      situation: expressGameTools.situation,
+    let playMinute = game.situation.minute;  // store this so we can add it to the play log
+    gameAfterPlay.situation.possessionId = teamId;
+    gameAfterPlay.situation.mode = "KICKOFF";
+    saveGameMutation.mutate(gameAfterPlay);
+
+
+    /*
+     I need to update the game to the new situation to reflect the play.  Then I need to log the game situation as it was before the play so we can undo/reset to that point if needed.
+     I also need the play log to reflect what minute the play happened at.
+    */
+     let playLog: PlayLog = {      
+      situation: game.situation,
       message: `${coinTossWinner.abbreviation} wins the coin toss`,
       date: new Date().toISOString(),
-      gameId: expressGameTools.gameId,
+      gameId: gameId,
       yardsGained: null,
       teamId: coinTossWinner.teamId,
-      logId: crypto.randomUUID()
-    });
+      logId: crypto.randomUUID(),
+      playMinute
+    }
 
-    gameData.situation.possessionId = teamId;
-    gameData.situation.mode = "KICKOFF";
-    saveGameMutation.mutate(gameData);
-    navigate(`/express/game/${expressGameTools.gameId}/kickoff`);
+    logPlayMutation.mutate(playLog);
+    navigate(gameUrl("kickoff"));
   }
 
   const handleUndo = () => {
@@ -59,7 +68,7 @@ export default function ExpressGame() {
       // delete the most recent play log for this game
       // if there are no more play logs left, reset the game to pregame state
       // invalidate log and game queries
-      useUndoMutation.mutate( expressGameTools.game);
+      useUndoMutation.mutate(game);
     }
   }
 
@@ -71,39 +80,39 @@ export default function ExpressGame() {
           <tbody>
             <tr>
               <td className="p-2 w-28 font-bold pr-4 border border-black">Home:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.homeScore}</td>
+              <td className="p-2 border border-black">{game.situation.homeScore}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Away:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.awayScore}</td>
+              <td className="p-2 border border-black">{game.situation.awayScore}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Zone:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.currentZone}</td>
+              <td className="p-2 border border-black">{game.situation.currentZone}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Minute:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.minute}</td>
+              <td className="p-2 border border-black">{game.situation.minute}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Possession:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.possessionId}</td>
+              <td className="p-2 border border-black">{game.situation.possessionId}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Quarter:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.quarter}</td>
+              <td className="p-2 border border-black">{game.situation.quarter}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Mode:</td>
-              <td className="p-2 border border-black">{expressGameTools.situation.mode}</td>
+              <td className="p-2 border border-black">{game.situation.mode}</td>
             </tr>
           </tbody>
         </table>
 
-        {expressGameTools.situation.mode == "PREGAME" && 
+        {game.situation.mode == "PREGAME" && 
           <>
-          <Button onClick={() => handleCoinFlip(expressGameTools.awayTeam.teamId)}>{expressGameTools.awayTeam.abbreviation}</Button>
-          <Button onClick={() => handleCoinFlip(expressGameTools.homeTeam.teamId)}>{expressGameTools.homeTeam.abbreviation}</Button>
+          <Button onClick={() => handleCoinFlip(awayTeam.teamId)}>{awayTeam.abbreviation}</Button>
+          <Button onClick={() => handleCoinFlip(homeTeam.teamId)}>{homeTeam.abbreviation}</Button>
           </>
         }        
 
@@ -111,14 +120,26 @@ export default function ExpressGame() {
           Undo
         </Button>
 
-        {expressGameTools.situation.mode == "KICKOFF" && 
-          <ButtonLink to={`/express/game/${expressGameTools.gameId}/kickoff`} className="mr-2 mb-2">
+        {game.situation.mode == "KICKOFF" && 
+          <ButtonLink to={gameUrl("kickoff")} className="mr-2 mb-2">
             Kickoff
           </ButtonLink>
         }
 
+        {game.situation.mode == "DRIVE" && 
+          <>
+          <ButtonLink to={gameUrl("pass")} className="mr-2 mb-2">
+            Pass Play
+          </ButtonLink>
+
+          <ButtonLink to={gameUrl("run")} className="mr-2 mb-2">
+            Run Play
+          </ButtonLink>
+          </>
+        }
+
         {playLogs.data.map(log => {
-          return <div key={log.logId}>{log.situation.minute}: {log.message}</div>
+          return <div key={log.logId}>{log.playMinute}: {log.message}</div>
         })}
 
       </ContentWrapper>

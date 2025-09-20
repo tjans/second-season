@@ -1,7 +1,9 @@
-Coin Flip
-Kickoff
-Kickoff return
-Figure out logging with what minute we're on and what minute the play happened at
+Punt
+Fumble (on kickoff as well)
+Interception
+Safety
+TD (on pass/run/kickoff/punt)
+Track zoneYards gained/lost
 
 
 
