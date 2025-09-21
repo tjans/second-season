@@ -38,7 +38,9 @@ const useExpressGameTools = () => {
         // yardsGained needs to get calculated based on old zone and new zone.  For every zone moved into, it's either 10 yards or 15.
         // Zones 1, 2, 7, 8 are worth 10 yards
         // Zones 3, 4, 5, 6 are worth 15 yards
-        // Zones 0 and 9 are endzones and worth 0 yards (unless you started your drive in 8 or less.  Then the 10 yards are included - I think this is how it works)
+        // Zones 0 and 9 are endzones.  If a score happens from the 8th zone, only add the yards if you haven't already logged the yards
+        // Basically if you START THE DRIVE in 8 and score, you get 10 yards, otherwise the 10 was already logged when you moved into the 
+        // 8th zone on a previous play.
         
         let yardsGained = 0; // Temporary for now
 
