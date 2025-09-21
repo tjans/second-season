@@ -41,7 +41,7 @@ const useExpressGameTools = () => {
         // Zones 0 and 9 are endzones.  If a score happens from the 8th zone, only add the yards if you haven't already logged the yards
         // Basically if you START THE DRIVE in 8 and score, you get 10 yards, otherwise the 10 was already logged when you moved into the 
         // 8th zone on a previous play.
-        
+        // Sacks and losses do not remove yards
         let yardsGained = 0; // Temporary for now
 
         logPlayMutation.mutate({      

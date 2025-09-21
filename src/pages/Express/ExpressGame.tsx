@@ -110,10 +110,6 @@ export default function ExpressGame() {
           </>
         }        
 
-        <Button onClick = {handleUndo} color="secondary">
-          Undo
-        </Button>
-
         {game.situation.mode == "KICKOFF" && 
           <ButtonLink to={gameUrl("kickoff")} className="mr-2 mb-2">
             Kickoff
@@ -123,14 +119,32 @@ export default function ExpressGame() {
         {game.situation.mode == "DRIVE" && 
           <>
           <ButtonLink to={gameUrl("pass")} className="mr-2 mb-2">
-            Pass Play
+            Pass
           </ButtonLink>
 
           <ButtonLink to={gameUrl("run")} className="mr-2 mb-2">
-            Run Play
+            Run
           </ButtonLink>
+
+          <ButtonLink to={gameUrl("fg")} className="mr-2 mb-2">
+            FG
+          </ButtonLink>
+
+          <ButtonLink to={gameUrl("punt")} className="mr-2 mb-2">
+            Punt
+          </ButtonLink>
+
+          <Button onClick={() => null} className="mr-2 mb-2">
+            Turnover on Downs
+          </Button>
           </>
         }
+
+        <div>
+          <Button onClick = {handleUndo} color="secondary">
+          Undo
+        </Button>
+        </div>
 
         {playLogs.data.map(log => {
           return <div key={log.logId}>{clockDisplay(log.playMinute)} - {log.message}</div>
