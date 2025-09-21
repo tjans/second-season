@@ -360,7 +360,7 @@ export const TextInput: React.FC<TextInputProps> = ({
         
         {/* Floating Label */}
         <label className={`${variantClasses.label} ${startIcon ? 'pl-9' : ''}`}>
-          {label}
+          {label} 
           {required && <span className="text-red-500 ml-1 font-bold">*</span>}
         </label>
         

@@ -6,40 +6,36 @@ import ButtonLink from '@/components/Elements/ButtonLink';
 import { useLogPlay } from '@/queries/playLogQueries';
 import { useSaveGame } from '@/queries/expressGameQueries';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { TextInput } from '@/components/Elements/TextInput';
+import { useForm } from 'react-hook-form';
 
 export default function ExpressPass() {
-  const {game, offenseTeam, defenseTeam, gameId, gameUrl} = useExpressGameTools();
+  const {offenseTeam, gameUrl, moveBall} = useExpressGameTools();
+  const [result, setResult] = useState<"CMP" | "INC" | "INT" | null>(null);
   
   const navigate = useNavigate();
   usePageTitle("Express Pass");
 
-  const saveGameMutation = useSaveGame();
-  const logPlayMutation = useLogPlay();
+  const {
+      register,
+      handleSubmit,
+      formState: { errors },
+      setFocus,
+      setValue
+    } = useForm();
 
   const handleZoneSelect = (zone: number) => {
-    // let gameAfterPlay = {...game};
-
-    // // Check for TD!!
-    // let playMinute = game.situation.minute;  // store this so we can add it to the play log
-    // gameAfterPlay.situation.minute++;
-    // gameAfterPlay.situation.currentZone = zone;
-    // gameAfterPlay.situation.mode = "DRIVE";
-    // gameAfterPlay.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
-    // saveGameMutation.mutate(gameAfterPlay);
-
-    // logPlayMutation.mutate({      
-    //   situation: game.situation,
-    //   message: `${defenseTeam.abbreviation} returns the kick to zone ${zone}`,
-    //   date: new Date().toISOString(),
-    //   gameId: game.gameId,
-    //   yardsGained: null,
-    //   teamId: defenseTeam.teamId,
-    //   logId: crypto.randomUUID(),
-    //   playMinute
-    // });
-
-    // navigate(gameUrl());
+  
   }
+
+  const onSubmit = (data: any) => {
+    console.log("Form Data: ", data);
+    moveBall(1, true);
+    // Here you would typically handle the form submission, e.g., send data to an API
+    // For this example, we'll just log the data and navigate back to the game page
+    navigate(gameUrl());
+  } 
 
   return (
     <>
@@ -48,14 +44,38 @@ export default function ExpressPass() {
         <div className="text-center mt-2">
           What was the result of the pass play?
 
-          complete
-          incomplete
-          intercepted
+          <div className="flex justify-center mt-4 gap-2 mb-4">
+            <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">Complete</Button>
+            <Button onClick={() => setResult("INC")} variant={result=="INC" ? "filled" : "outlined"} className="w-24">Incomplete</Button>
+            <Button onClick={() => setResult("INT")} variant={result=="INT" ? "filled" : "outlined"} className="w-24">Intercepted</Button>
+            <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+          </div>
+          
+          {result == "CMP" && <>
+             <section>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <TextInput
+                    label="Zones"
+                    name="zones"
+                    register={register}
+                    error={errors.zones}
+                    type="number"
+                    required
+                    rules={{
+                      required: "Zones is required"
+                    }}
+                />                    
+                <Button type="submit">Submit</Button>
+            </form>
+        </section>
+          </>}
+          {result == "INC" && <div className="font-bold">Incomplete!</div>}
+          {result == "INT" && <div className="font-bold">Intercepted!</div>}
           
         </div>
         
         <div className="text-center">
-          <ButtonLink to={gameUrl()} color="secondary" className="ml-2">Cancel</ButtonLink>
+          
         </div>
       </ContentWrapper>
     </>

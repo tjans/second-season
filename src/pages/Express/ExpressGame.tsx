@@ -8,8 +8,7 @@ import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 
 // queries
-import { useSaveGame, useUndo } from '@/queries/expressGameQueries';
-import { useLogPlay, usePlayLogs } from '@/queries/playLogQueries';
+import { usePlayLogs } from '@/queries/playLogQueries';
 
 // elements
 import Button from '@/components/Elements/Button';
@@ -20,15 +19,10 @@ import { PlayLog } from '@/types/PlayLog';
 
 // This is the main entry point for a game
 export default function ExpressGame() {
-  
-  const {game, awayTeam, homeTeam, gameId, gameUrl} = useExpressGameTools();
+
+  const {game, awayTeam, homeTeam, gameId, gameUrl, saveGameMutation, logPlayMutation, undoMutation, clockDisplay} = useExpressGameTools();
   const navigate = useNavigate(); 
   const playLogs = usePlayLogs(gameId);
-
-  // mutations
-  const saveGameMutation = useSaveGame();
-  const logPlayMutation = useLogPlay();
-  const useUndoMutation = useUndo();
 
   usePageTitle("Express Gameday");
 
@@ -68,7 +62,7 @@ export default function ExpressGame() {
       // delete the most recent play log for this game
       // if there are no more play logs left, reset the game to pregame state
       // invalidate log and game queries
-      useUndoMutation.mutate(game);
+      undoMutation.mutate(game);
     }
   }
 
@@ -139,7 +133,7 @@ export default function ExpressGame() {
         }
 
         {playLogs.data.map(log => {
-          return <div key={log.logId}>{log.playMinute}: {log.message}</div>
+          return <div key={log.logId}>{clockDisplay(log.playMinute)} - {log.message}</div>
         })}
 
       </ContentWrapper>

@@ -1,6 +1,7 @@
 import {db} from '@/db';
 import { ExpressGame } from '@/types/ExpressGame';
 import playLogService from './playLogService';
+import { PlayLog } from '@/types/PlayLog';
 
 export default {
     getGame: async (gameId: string): Promise<ExpressGame> => {
