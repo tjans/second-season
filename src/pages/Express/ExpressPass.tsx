@@ -23,17 +23,18 @@ export default function ExpressPass() {
       formState: { errors },
       setFocus,
       setValue
-    } = useForm();
+    } = useForm<FormData>();
 
   const handleZoneSelect = (zone: number) => {
   
   }
 
-  const onSubmit = (data: any) => {
-    console.log("Form Data: ", data);
-    moveBall(1, true);
-    // Here you would typically handle the form submission, e.g., send data to an API
-    // For this example, we'll just log the data and navigate back to the game page
+  type FormData = {
+    zones: string;
+  }
+
+  const onSubmit = (data: FormData) => {
+    moveBall(Number(data.zones), "pass", true); // I don't think the clock stops, each play takes a minute regardless.    
     navigate(gameUrl());
   } 
 
@@ -43,6 +44,8 @@ export default function ExpressPass() {
         <div className="text-center"><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
         <div className="text-center mt-2">
           What was the result of the pass play?
+
+          <div className="text-red-400 my-4">There's an issue where we're on minute 1, but the pass play gets logged as minute 2</div>
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
             <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">Complete</Button>

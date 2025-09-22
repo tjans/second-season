@@ -19,14 +19,14 @@ export default function ExpressKickoff() {
   const handleZoneSelect = (zone: number) => {
  let gameAfterPlay = {...game};
 
-    // Check for TD!!
     let playMinute = game.situation.minute;  // store this so we can add it to the play log
     gameAfterPlay.situation.minute++;
     gameAfterPlay.situation.currentZone = zone;
+    gameAfterPlay.situation.driveStartZone = zone; // used to determine if we log the yards from a play that starts in the 8th zone and goes for a TD
     gameAfterPlay.situation.mode = "DRIVE";
     gameAfterPlay.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
     saveGameMutation.mutate(gameAfterPlay);
-
+    
     logPlayMutation.mutate({      
       situation: game.situation,
       message: `${defenseTeam.abbreviation} returns the kick to zone ${zone}`,

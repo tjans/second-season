@@ -20,19 +20,33 @@ const useExpressGameTools = () => {
       const offenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? homeTeam.data : awayTeam.data;
       const defenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? awayTeam.data : homeTeam.data;
       const gameUrl = (url:string = "") => `/express/game/${gameId}/${url}`;
-
-      const moveBall = async (zones: number, usesTime: boolean) : Promise<void> => {
+    
+      /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
+      const moveBall = async (zones: number, type: "pass" | "run" | "KR" | "PR", usesTime: boolean) : Promise<void> => {
         if(!game.data.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set")
-
+    
+        let isTouchdown = false;
         let newZone = zones + game.data.situation.currentZone;
         //let delta = newZone - game.data.situation.currentZone;
-
+       
         newZone = zones > 0
             ? Math.min(9, newZone)
             : Math.max(0, newZone);        
 
         game.data.situation.currentZone = newZone;
         if(usesTime) game.data.situation.minute++;
+
+        if(newZone === 9) {
+            isTouchdown = true;
+            game.data.situation.mode = "PAT";
+
+            if(offenseTeam == homeTeam.data) {
+                game.data.situation.homeScore += 6;
+            } else {
+                game.data.situation.awayScore += 6;
+            }
+        }
+
         saveGameMutation.mutate(game.data);
 
         // yardsGained needs to get calculated based on old zone and new zone.  For every zone moved into, it's either 10 yards or 15.
@@ -42,16 +56,51 @@ const useExpressGameTools = () => {
         // Basically if you START THE DRIVE in 8 and score, you get 10 yards, otherwise the 10 was already logged when you moved into the 
         // 8th zone on a previous play.
         // Sacks and losses do not remove yards
-        let yardsGained = 0; // Temporary for now
+        //let yardsGained = 0; // Temporary for now
+
+        
+        let yardsGained = 0;
+        if(zones > 0) {
+            for(let z = game.data.situation.currentZone + 1; z <= newZone; z++) {
+                if(z === 0 || z === 9) {
+                    yardsGained += 10; // endzones
+                } else if(z >= 3 && z <= 6) {
+                    yardsGained += 15; // 30, 40, 50
+                } else {
+                    yardsGained += 10; // 10, 20
+                }
+            }
+        }
+
+        let message = "UNKNOWN PLAY TYPE";
+        switch(type) {
+            case "pass":
+                message = `${offenseTeam?.abbreviation} completes a pass`;
+                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                break;
+            case "run":
+                message = `${offenseTeam?.abbreviation} runs`;
+                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                break;
+            case "KR":
+                message = `${offenseTeam?.abbreviation} returns the kickoff`;
+                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                break;
+            case "PR":
+                message = `${offenseTeam?.abbreviation} returns the punt`;
+                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                break;
+        }
 
         logPlayMutation.mutate({      
             situation: game.data.situation,
-            message: `${offenseTeam?.abbreviation} completes a pass to zone ${newZone}`,
+            message,
             date: new Date().toISOString(),
             gameId: game.data.gameId,
             yardsGained: yardsGained,
             teamId: offenseTeam?.teamId || "",
             logId: crypto.randomUUID(),
+            TD: isTouchdown ? 1 : 0,
             playMinute: game.data.situation.minute
         });
       }

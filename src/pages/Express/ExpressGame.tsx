@@ -27,16 +27,16 @@ export default function ExpressGame() {
   usePageTitle("Express Gameday");
 
   // functions
-  const handleCoinFlip = (teamId: string) => {    
-    let coinTossWinner = teamId == awayTeam.teamId ? awayTeam : homeTeam;
+  const handleCoinFlip = (receivingTeamId: string) => {    
+    let kickingTeam = receivingTeamId == awayTeam.teamId ? homeTeam : awayTeam;
+    let receivingTeam = receivingTeamId == awayTeam.teamId ? awayTeam : homeTeam;
 
     let gameAfterPlay = {...game};
 
     let playMinute = game.situation.minute;  // store this so we can add it to the play log
-    gameAfterPlay.situation.possessionId = teamId;
+    gameAfterPlay.situation.possessionId = kickingTeam.teamId; // kicking team kicks off, receiving team receives
     gameAfterPlay.situation.mode = "KICKOFF";
     saveGameMutation.mutate(gameAfterPlay);
-
 
     /*
      I need to update the game to the new situation to reflect the play.  Then I need to log the game situation as it was before the play so we can undo/reset to that point if needed.
@@ -44,11 +44,11 @@ export default function ExpressGame() {
     */
      let playLog: PlayLog = {      
       situation: game.situation,
-      message: `${coinTossWinner.abbreviation} wins the coin toss`,
+      message: `${receivingTeam.abbreviation} will receive the kickoff`,
       date: new Date().toISOString(),
       gameId: gameId,
       yardsGained: null,
-      teamId: coinTossWinner.teamId,
+      teamId: kickingTeam.teamId,
       logId: crypto.randomUUID(),
       playMinute
     }
@@ -86,7 +86,7 @@ export default function ExpressGame() {
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Minute:</td>
-              <td className="p-2 border border-black">{game.situation.minute}</td>
+              <td className="p-2 border border-black">{clockDisplay(game.situation.minute)}</td>
             </tr>
             <tr>
               <td className="p-2 font-bold pr-4 border border-black ">Possession:</td>
@@ -105,6 +105,7 @@ export default function ExpressGame() {
 
         {game.situation.mode == "PREGAME" && 
           <>
+          <div>Who will receive?</div>
           <Button onClick={() => handleCoinFlip(awayTeam.teamId)}>{awayTeam.abbreviation}</Button>
           <Button onClick={() => handleCoinFlip(homeTeam.teamId)}>{homeTeam.abbreviation}</Button>
           </>
@@ -113,6 +114,12 @@ export default function ExpressGame() {
         {game.situation.mode == "KICKOFF" && 
           <ButtonLink to={gameUrl("kickoff")} className="mr-2 mb-2">
             Kickoff
+          </ButtonLink>
+        }
+
+         {game.situation.mode == "PAT" && 
+          <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
+            PAT
           </ButtonLink>
         }
 
