@@ -1,6 +1,7 @@
 import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
 import { useLogPlay } from "@/queries/playLogQueries";
 import { useTeam } from "@/queries/teamQueries";
+import { P } from "node_modules/framer-motion/dist/types.d-Cjd591yU";
 import { use } from "react";
 import { useParams } from "react-router-dom";
 
@@ -23,31 +24,35 @@ const useExpressGameTools = () => {
     
       /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
       const moveBall = async (zones: number, type: "pass" | "run" | "KR" | "PR", usesTime: boolean) : Promise<void> => {
-        if(!game.data.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set")
-    
+        let gameAfterPlay = {...game};
+        let playMinute = game.data.situation.minute; // store this for the log to indicate what time the play happened
+
+        if(!gameAfterPlay.data.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
+
         let isTouchdown = false;
-        let newZone = zones + game.data.situation.currentZone;
+        let newZone = zones + gameAfterPlay.data.situation.currentZone;
         //let delta = newZone - game.data.situation.currentZone;
        
         newZone = zones > 0
             ? Math.min(9, newZone)
             : Math.max(0, newZone);        
 
-        game.data.situation.currentZone = newZone;
-        if(usesTime) game.data.situation.minute++;
+        gameAfterPlay.data.situation.currentZone = newZone;
 
+        if(usesTime) gameAfterPlay.data.situation.minute++;
+        
         if(newZone === 9) {
             isTouchdown = true;
-            game.data.situation.mode = "PAT";
+            gameAfterPlay.data.situation.mode = "PAT";
 
             if(offenseTeam == homeTeam.data) {
-                game.data.situation.homeScore += 6;
+                gameAfterPlay.data.situation.homeScore += 6;
             } else {
-                game.data.situation.awayScore += 6;
+                gameAfterPlay.data.situation.awayScore += 6;
             }
         }
 
-        saveGameMutation.mutate(game.data);
+        saveGameMutation.mutate(gameAfterPlay.data);
 
         // yardsGained needs to get calculated based on old zone and new zone.  For every zone moved into, it's either 10 yards or 15.
         // Zones 1, 2, 7, 8 are worth 10 yards
@@ -61,7 +66,7 @@ const useExpressGameTools = () => {
         
         let yardsGained = 0;
         if(zones > 0) {
-            for(let z = game.data.situation.currentZone + 1; z <= newZone; z++) {
+            for(let z = gameAfterPlay.data.situation.currentZone + 1; z <= newZone; z++) {
                 if(z === 0 || z === 9) {
                     yardsGained += 10; // endzones
                 } else if(z >= 3 && z <= 6) {
@@ -93,15 +98,15 @@ const useExpressGameTools = () => {
         }
 
         logPlayMutation.mutate({      
-            situation: game.data.situation,
+            situation: gameAfterPlay.data.situation,
             message,
             date: new Date().toISOString(),
-            gameId: game.data.gameId,
+            gameId: gameId,
             yardsGained: yardsGained,
             teamId: offenseTeam?.teamId || "",
             logId: crypto.randomUUID(),
             TD: isTouchdown ? 1 : 0,
-            playMinute: game.data.situation.minute
+            playMinute
         });
       }
 
