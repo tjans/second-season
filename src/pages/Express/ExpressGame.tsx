@@ -1,6 +1,9 @@
 // react
 import { useNavigate } from 'react-router-dom';
 
+// icons
+import { IoMdAmericanFootball } from "react-icons/io";
+
 // hooks
 import usePageTitle from '@/hooks/usePageTitle'
 
@@ -69,39 +72,48 @@ export default function ExpressGame() {
   return (
     <>
       <ContentWrapper>
-
-        <table className="mb-6 w-full table-fixed border">
+        
+        <table className="w-full">
           <tbody>
             <tr>
-              <td className="p-2 w-28 font-bold pr-4 border border-black">Home:</td>
-              <td className="p-2 border border-black">{game.situation.homeScore}</td>
-            </tr>
-            <tr>
-              <td className="p-2 font-bold pr-4 border border-black ">Away:</td>
-              <td className="p-2 border border-black">{game.situation.awayScore}</td>
-            </tr>
-            <tr>
-              <td className="p-2 font-bold pr-4 border border-black ">Zone:</td>
-              <td className="p-2 border border-black">{game.situation.currentZone}</td>
-            </tr>
-            <tr>
-              <td className="p-2 font-bold pr-4 border border-black ">Minute:</td>
-              <td className="p-2 border border-black">{clockDisplay(game.situation.minute)}</td>
-            </tr>
-            <tr>
-              <td className="p-2 font-bold pr-4 border border-black ">Possession:</td>
-              <td className="p-2 border border-black">{game.situation.possessionId}</td>
-            </tr>
-            <tr>
-              <td className="p-2 font-bold pr-4 border border-black ">Quarter:</td>
-              <td className="p-2 border border-black">{game.situation.quarter}</td>
-            </tr>
-            <tr>
-              <td className="p-2 font-bold pr-4 border border-black ">Mode:</td>
-              <td className="p-2 border border-black">{game.situation.mode}</td>
+              <td className="text-center text-xl font-bold">  
+                <div className="flex justify-center items-center">
+                  {game.situation.possessionId == homeTeam.teamId && <IoMdAmericanFootball className="mr-2 text-brown-600" />}
+                  {homeTeam.abbreviation}&nbsp;&nbsp;&nbsp;<span className="text-blue-700">{game.situation.homeScore}</span>
+                </div>
+              </td>             
+              
+              <td className="text-center text-xl font-bold justify-center items-center">  
+                 <div className="flex justify-center items-center">
+                  {game.situation.possessionId == awayTeam.teamId && <IoMdAmericanFootball className="mr-2 text-brown-600" />}
+                  {awayTeam.abbreviation}&nbsp;&nbsp;&nbsp;<span className="text-red-700">{game.situation.awayScore}</span>
+                </div>
+              </td>
+                
             </tr>
           </tbody>
         </table>
+
+        <table className="w-full table-fixed">
+          <tbody>
+            <tr>
+              <td className="px-2 text-center text-2xl">{clockDisplay(game.situation.minute)}</td>
+            </tr>
+
+            <tr>
+              <td className="px-2 text-center">Ball on {game.situation.currentZone}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table className="mb-6 w-1/2 table-fixed mx-auto">
+          <tbody>
+            <tr>
+              <td className="text-center"><span className="font-bold">Quarter:</span> {game.situation.quarter}</td>
+              <td className="text-center"><span className="font-bold">Mode:</span> {game.situation.mode}</td>
+            </tr>
+          </tbody>
+        </table>  
 
         {game.situation.mode == "PREGAME" && 
           <>
@@ -147,7 +159,7 @@ export default function ExpressGame() {
           </>
         }
 
-        <div>
+        <div className="mb-8">
           <Button onClick = {handleUndo} color="secondary">
           Undo
         </Button>

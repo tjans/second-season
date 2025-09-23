@@ -29,7 +29,7 @@ export default function ExpressKickoff() {
     
     logPlayMutation.mutate({      
       situation: game.situation,
-      message: `${defenseTeam.abbreviation} returns the kick to zone ${zone}`,
+      message: `${offenseTeam.abbreviation} kickoff to zone ${zone}`,
       date: new Date().toISOString(),
       gameId: game.gameId,
       yardsGained: null,

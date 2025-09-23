@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 export default function ExpressPat() {
-  const {game, offenseTeam, defenseTeam, homeTeam, gameUrl} = useExpressGameTools();
+  const {game, offenseTeam, homeTeam, gameUrl} = useExpressGameTools();
   const [result, setResult] = useState<"PAT" | "2PT" | null>(null);
   
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ export default function ExpressPat() {
       <ContentWrapper>
         <div className="text-center">
           <span className="font-bold">Possession:</span> {offenseTeam.abbreviation} 
-          <div>2pt. conversion or kick PAT?</div>        
+          <div>PAT or 2pt Conversion?</div>        
         </div>
 
         <div className="flex justify-center mt-4 gap-2 mb-4">
