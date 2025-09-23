@@ -47,6 +47,35 @@ export default function ExpressPat() {
     navigate(gameUrl());
   }
 
+  const handle2PT = (isMade: boolean) => {
+    let gameAfterPlay = {...game};
+  
+    gameAfterPlay.situation.currentZone = null;
+    gameAfterPlay.situation.mode = "KICKOFF";
+
+    if(isMade) {
+      if(offenseTeam.teamId == homeTeam.teamId) {
+          gameAfterPlay.situation.homeScore += 2;
+      } else {
+          gameAfterPlay.situation.awayScore += 2;
+      }
+    } 
+    saveGameMutation.mutate(gameAfterPlay);
+
+    logPlayMutation.mutate({      
+      situation: gameAfterPlay.situation,
+      message: `${offenseTeam.abbreviation} 2PT try is ${isMade ? "successful!" : "unsuccessful!"}`,
+      date: new Date().toISOString(),
+      gameId: game.gameId,
+      yardsGained: null,
+      teamId: offenseTeam.teamId,
+      logId: crypto.randomUUID(),
+      playMinute: gameAfterPlay.situation.minute,
+    });
+
+    navigate(gameUrl());
+  }
+
   return (
     <>
       <ContentWrapper>
@@ -71,8 +100,8 @@ export default function ExpressPat() {
 
         {result == "2PT" && 
           <div className="flex justify-center mt-4 gap-2 mb-4">
-            <Button onClick={()=>null} color="info">2PT Success</Button>
-            <Button onClick={()=>null} color="info">2PT Failed</Button>
+            <Button onClick={()=>handle2PT(true)} color="info">2PT Success</Button>
+            <Button onClick={()=>handle2PT(false)} color="info">2PT Failed</Button>
           </div>
         }
 

@@ -119,7 +119,7 @@ export default function ExpressGame() {
 
          {game.situation.mode == "PAT" && 
           <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
-            PAT
+            PAT / 2PT
           </ButtonLink>
         }
 
