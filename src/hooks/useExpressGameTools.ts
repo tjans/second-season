@@ -24,6 +24,7 @@ const useExpressGameTools = () => {
     
       /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
       const moveBall = async (zones: number, type: "pass" | "run" | "KR" | "PR", usesTime: boolean) : Promise<void> => {
+        const currentZone = game.data.situation.currentZone ?? 0;
         let gameAfterPlay = {...game};
         let playMinute = game.data.situation.minute; // store this for the log to indicate what time the play happened
 
@@ -31,14 +32,14 @@ const useExpressGameTools = () => {
 
         let isTouchdown = false;
         let newZone = zones + gameAfterPlay.data.situation.currentZone;
-        //let delta = newZone - game.data.situation.currentZone;
-       
+                       
         newZone = zones > 0
             ? Math.min(9, newZone)
             : Math.max(0, newZone);        
 
         gameAfterPlay.data.situation.currentZone = newZone;
-
+        let delta = newZone - currentZone;
+        
         if(usesTime) gameAfterPlay.data.situation.minute++;
         
         if(newZone === 9) {
@@ -80,20 +81,20 @@ const useExpressGameTools = () => {
         let message = "UNKNOWN PLAY TYPE";
         switch(type) {
             case "pass":
-                message = `${offenseTeam?.abbreviation} completes a pass`;
-                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                message = `${offenseTeam?.abbreviation} pass sequence ${delta} zone${delta === 1 ? "" : "s"}`;
+                message += isTouchdown ? ` for a TD!` : ` to zone ${newZone}`;
                 break;
             case "run":
-                message = `${offenseTeam?.abbreviation} runs`;
-                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                message = `${offenseTeam?.abbreviation} run sequence ${delta} zone${delta === 1 ? "" : "s"}`;
+                message += isTouchdown ? ` for a TD!` : ` to zone ${newZone}`;
                 break;
             case "KR":
                 message = `${offenseTeam?.abbreviation} returns the kickoff`;
-                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                message += isTouchdown ? ` ${delta} zones for a TD!` : ` to zone ${newZone}`;
                 break;
             case "PR":
                 message = `${offenseTeam?.abbreviation} returns the punt`;
-                message += isTouchdown ? " for a TD!" : ` to zone ${newZone}`;
+                message += isTouchdown ? ` ${delta} zones for a TD!` : ` to zone ${newZone}`;
                 break;
         }
 

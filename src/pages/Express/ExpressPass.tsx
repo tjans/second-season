@@ -11,7 +11,7 @@ import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
 
 export default function ExpressPass() {
-  const {offenseTeam, gameUrl, moveBall} = useExpressGameTools();
+  const {offenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId} = useExpressGameTools();
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | null>(null);
   
   const navigate = useNavigate();
@@ -33,6 +33,30 @@ export default function ExpressPass() {
     zones: string;
   }
 
+  const handleIncomplete = () => {
+    let gameAfterPlay = {...game};
+    let playMinute = game.situation.minute; // store this for the log to indicate what time the play happened
+
+    // increase clock
+    gameAfterPlay.situation.minute++;
+    saveGameMutation.mutate(gameAfterPlay);
+
+    // log the play
+    logPlayMutation.mutate({      
+            situation: gameAfterPlay.situation,
+            message: `${offenseTeam?.abbreviation} throws incomplete pass`,
+            date: new Date().toISOString(),
+            gameId: gameId,
+            yardsGained: 0,
+            teamId: offenseTeam?.teamId || "",
+            logId: crypto.randomUUID(),
+            TD: 0,
+            playMinute
+        });
+        
+    navigate(gameUrl());
+  }
+
   const onSubmit = (data: FormData) => {
     moveBall(Number(data.zones), "pass", true); // I don't think the clock stops, each play takes a minute regardless.    
     navigate(gameUrl());
@@ -44,8 +68,6 @@ export default function ExpressPass() {
         <div className="text-center"><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
         <div className="text-center mt-2">
           What was the result of the pass play?
-
-          <div className="text-red-400 my-4">There's an issue where we're on minute 1, but the pass play gets logged as minute 2</div>
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
             <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">Complete</Button>
@@ -72,7 +94,10 @@ export default function ExpressPass() {
             </form>
         </section>
           </>}
-          {result == "INC" && <div className="font-bold">Incomplete!</div>}
+          {result == "INC" && 
+            <Button onClick={handleIncomplete} color="info">Confirm Incomplete</Button>
+          }
+
           {result == "INT" && <div className="font-bold">Intercepted!</div>}
           
         </div>
