@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 
 export default function ExpressPass() {
   const {offenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId} = useExpressGameTools();
-  const [result, setResult] = useState<"CMP" | "INC" | "INT" | null>(null);
+  const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>(null);
   
   const navigate = useNavigate();
   usePageTitle("Express Pass");
@@ -53,7 +53,7 @@ export default function ExpressPass() {
             TD: 0,
             playMinute
         });
-        
+
     navigate(gameUrl());
   }
 
@@ -67,12 +67,13 @@ export default function ExpressPass() {
       <ContentWrapper>
         <div className="text-center"><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
         <div className="text-center mt-2">
-          What was the result of the pass play?
+          What was the result of the pass play? <span className="text-red-500">Plays where drive started in zone 8</span>
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
             <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">Complete</Button>
             <Button onClick={() => setResult("INC")} variant={result=="INC" ? "filled" : "outlined"} className="w-24">Incomplete</Button>
             <Button onClick={() => setResult("INT")} variant={result=="INT" ? "filled" : "outlined"} className="w-24">Intercepted</Button>
+            <Button onClick={() => setResult("SACK")} variant={result=="SACK" ? "filled" : "outlined"} className="w-24">Sack</Button>
             <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
           </div>
           
@@ -80,7 +81,7 @@ export default function ExpressPass() {
              <section>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <TextInput
-                    label="Zones"
+                    label="How many zones did the pass gain?"
                     name="zones"
                     register={register}
                     error={errors.zones}
@@ -98,7 +99,13 @@ export default function ExpressPass() {
             <Button onClick={handleIncomplete} color="info">Confirm Incomplete</Button>
           }
 
-          {result == "INT" && <div className="font-bold">Intercepted!</div>}
+          {result == "INT" && 
+            <Button onClick={() => null} color="info">Confirm Interception</Button>
+          }
+
+          {result == "SACK" && 
+            <Button onClick={() => null} color="info">Confirm Sack</Button>
+          }
           
         </div>
         

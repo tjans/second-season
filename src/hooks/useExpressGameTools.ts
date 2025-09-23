@@ -63,11 +63,10 @@ const useExpressGameTools = () => {
         // 8th zone on a previous play.
         // Sacks and losses do not remove yards
         //let yardsGained = 0; // Temporary for now
-
         
         let yardsGained = 0;
         if(zones > 0) {
-            for(let z = gameAfterPlay.data.situation.currentZone + 1; z <= newZone; z++) {
+            for(let z = currentZone + 1; z <= newZone; z++) {
                 if(z === 0 || z === 9) {
                     yardsGained += 10; // endzones
                 } else if(z >= 3 && z <= 6) {
@@ -77,6 +76,8 @@ const useExpressGameTools = () => {
                 }
             }
         }
+
+        //console.log("currentZone", currentZone, "newZone", newZone, "yardsGained", yardsGained);
 
         let message = "UNKNOWN PLAY TYPE";
         switch(type) {
@@ -103,7 +104,7 @@ const useExpressGameTools = () => {
             message,
             date: new Date().toISOString(),
             gameId: gameId,
-            yardsGained: yardsGained,
+            yardsGained,
             teamId: offenseTeam?.teamId || "",
             logId: crypto.randomUUID(),
             TD: isTouchdown ? 1 : 0,
