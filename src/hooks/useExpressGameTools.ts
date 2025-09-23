@@ -46,7 +46,7 @@ const useExpressGameTools = () => {
             isTouchdown = true;
             gameAfterPlay.data.situation.mode = "PAT";
 
-            if(offenseTeam == homeTeam.data) {
+            if(offenseTeam.teamId == homeTeam.data.teamId) {
                 gameAfterPlay.data.situation.homeScore += 6;
             } else {
                 gameAfterPlay.data.situation.awayScore += 6;

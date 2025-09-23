@@ -67,7 +67,7 @@ export default function ExpressPass() {
       <ContentWrapper>
         <div className="text-center"><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
         <div className="text-center mt-2">
-          What was the result of the pass play? <span className="text-red-500">Plays where drive started in zone 8</span>
+          What was the result of the pass play? <span className="text-red-500 block">Plays where drive started in zone 8</span>
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
             <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">Complete</Button>
@@ -78,23 +78,24 @@ export default function ExpressPass() {
           </div>
           
           {result == "CMP" && <>
-             <section>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <TextInput
-                    label="How many zones did the pass gain?"
-                    name="zones"
-                    register={register}
-                    error={errors.zones}
-                    type="number"
-                    required
-                    rules={{
-                      required: "Zones is required"
-                    }}
-                />                    
-                <Button type="submit">Submit</Button>
-            </form>
-        </section>
+            <section>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <TextInput
+                        label="How many zones did the pass gain?"
+                        name="zones"
+                        register={register}
+                        error={errors.zones}
+                        type="number"
+                        required
+                        rules={{
+                          required: "Zones is required"
+                        }}
+                    />                    
+                    <Button type="submit">Submit</Button>
+                </form>
+            </section>
           </>}
+
           {result == "INC" && 
             <Button onClick={handleIncomplete} color="info">Confirm Incomplete</Button>
           }
