@@ -57,6 +57,34 @@ export default function ExpressPass() {
     navigate(gameUrl());
   }
 
+  const handleSack = (oneZoneLoss: boolean) => {
+    let gameAfterPlay = {...game};
+    let currentZone = game.situation.currentZone;
+    if(!currentZone) throw new Error("Current zone is not defined");
+
+    let playMinute = game.situation.minute; // store this for the log to indicate what time the play happened
+    let newZone = oneZoneLoss ? currentZone - 1 : currentZone;
+    
+    gameAfterPlay.situation.currentZone = newZone;
+    gameAfterPlay.situation.minute++;
+    saveGameMutation.mutate(gameAfterPlay);
+
+    // log the play
+    logPlayMutation.mutate({      
+            situation: gameAfterPlay.situation,
+            message: `${offenseTeam?.abbreviation} sacked for ${oneZoneLoss ? `for a 1 zone loss to zone ${newZone}` : `no zone loss, ball remains in zone ${currentZone}`}`,
+            date: new Date().toISOString(),
+            gameId: gameId,
+            yardsGained: -7,
+            teamId: offenseTeam?.teamId || "",
+            logId: crypto.randomUUID(),
+            TD: 0,
+            playMinute
+        });
+
+    navigate(gameUrl());
+  }
+
   const onSubmit = (data: FormData) => {
     moveBall(Number(data.zones), "pass", true); // I don't think the clock stops, each play takes a minute regardless.    
     navigate(gameUrl());
@@ -105,7 +133,10 @@ export default function ExpressPass() {
           }
 
           {result == "SACK" && 
-            <Button onClick={() => null} color="info">Confirm Sack</Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => handleSack(false)} color="info">Same zone</Button>
+              <Button onClick={() => handleSack(true)} color="info">1-zone Loss</Button>
+            </div>
           }
           
         </div>
