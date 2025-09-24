@@ -60,6 +60,13 @@ export default function ExpressGame() {
     navigate(gameUrl("kickoff"));
   }
 
+  const handleTurnoverOnDowns = () => {
+    // Increase minute
+    // Change possession
+    // Recalculate new zone
+    // Switch quarters if necessary (maybe make a "update clock" function that handles this logic)
+  }
+
   const handleUndo = () => {
     if(confirm("Are you sure you want to undo the last action?")){
       // delete the most recent play log for this game
@@ -153,16 +160,20 @@ export default function ExpressGame() {
             Punt
           </ButtonLink>
 
-          <Button onClick={() => null} className="mr-2 mb-2">
+          <Button onClick={handleTurnoverOnDowns} className="mr-2 mb-2">
             Turnover on Downs
           </Button>
           </>
         }
 
         <div className="mb-8">
+          <ButtonLink color="info" to={gameUrl("stats")} className="mr-2">
+            Stats
+          </ButtonLink>
+
           <Button onClick = {handleUndo} color="secondary">
-          Undo
-        </Button>
+            Undo
+          </Button>
         </div>
 
         {playLogs.data.map(log => {

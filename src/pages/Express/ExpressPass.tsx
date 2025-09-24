@@ -3,8 +3,6 @@ import ContentWrapper from "@/components/ContentWrapper";
 import Button from '@/components/Elements/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import ButtonLink from '@/components/Elements/ButtonLink';
-import { useLogPlay } from '@/queries/playLogQueries';
-import { useSaveGame } from '@/queries/expressGameQueries';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { TextInput } from '@/components/Elements/TextInput';
@@ -21,13 +19,7 @@ export default function ExpressPass() {
       register,
       handleSubmit,
       formState: { errors },
-      setFocus,
-      setValue
     } = useForm<FormData>();
-
-  const handleZoneSelect = (zone: number) => {
-  
-  }
 
   type FormData = {
     zones: string;
@@ -58,30 +50,7 @@ export default function ExpressPass() {
   }
 
   const handleSack = (oneZoneLoss: boolean) => {
-    let gameAfterPlay = {...game};
-    let currentZone = game.situation.currentZone;
-    if(!currentZone) throw new Error("Current zone is not defined");
-
-    let playMinute = game.situation.minute; // store this for the log to indicate what time the play happened
-    let newZone = oneZoneLoss ? currentZone - 1 : currentZone;
-    
-    gameAfterPlay.situation.currentZone = newZone;
-    gameAfterPlay.situation.minute++;
-    saveGameMutation.mutate(gameAfterPlay);
-
-    // log the play
-    logPlayMutation.mutate({      
-            situation: gameAfterPlay.situation,
-            message: `${offenseTeam?.abbreviation} sacked for ${oneZoneLoss ? `for a 1 zone loss to zone ${newZone}` : `no zone loss, ball remains in zone ${currentZone}`}`,
-            date: new Date().toISOString(),
-            gameId: gameId,
-            yardsGained: -7,
-            teamId: offenseTeam?.teamId || "",
-            logId: crypto.randomUUID(),
-            TD: 0,
-            playMinute
-        });
-
+    moveBall(oneZoneLoss ? -1 : 0, "sack", true);
     navigate(gameUrl());
   }
 

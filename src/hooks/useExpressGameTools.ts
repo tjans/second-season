@@ -21,9 +21,9 @@ const useExpressGameTools = () => {
       const offenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? homeTeam.data : awayTeam.data;
       const defenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? awayTeam.data : homeTeam.data;
       const gameUrl = (url:string = "") => `/express/game/${gameId}/${url}`;
-    
+
       /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
-      const moveBall = async (zones: number, type: "pass" | "run" | "KR" | "PR", usesTime: boolean) : Promise<void> => {
+      const moveBall = async (zones: number, type: "pass" | "sack" | "run" | "KR" | "PR", usesTime: boolean) : Promise<void> => {
         const currentZone = game.data.situation.currentZone ?? 0;
         let gameAfterPlay = {...game};
         let playMinute = game.data.situation.minute; // store this for the log to indicate what time the play happened
@@ -31,6 +31,7 @@ const useExpressGameTools = () => {
         if(!gameAfterPlay.data.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
 
         let isTouchdown = false;
+        let isSafety = false;
         let newZone = zones + gameAfterPlay.data.situation.currentZone;
                        
         newZone = zones > 0
@@ -51,8 +52,30 @@ const useExpressGameTools = () => {
             } else {
                 gameAfterPlay.data.situation.awayScore += 6;
             }
+
+        } else if(newZone === 0) {
+            isSafety = true;
+            gameAfterPlay.data.situation.mode = "KICKOFF";
+
+            if(offenseTeam.teamId == homeTeam.data.teamId) {
+                gameAfterPlay.data.situation.awayScore += 2;
+            } else {
+                gameAfterPlay.data.situation.homeScore += 2;
+            }
         }
 
+        /*
+            if minute > 15 and Q1/Q3, set to minute 1 and Q2/Q4
+            if minute > 15 and Q2
+                set to minute 1 and Q3
+                set possession to correct team (team who won toss in first half)
+                set currentZone to null
+            if minute > 15 and Q4
+                set to minute 1 and OT
+                new coin toss
+        */
+
+        // Save the game situation changes
         saveGameMutation.mutate(gameAfterPlay.data);
 
         // yardsGained needs to get calculated based on old zone and new zone.  For every zone moved into, it's either 10 yards or 15.
@@ -75,6 +98,8 @@ const useExpressGameTools = () => {
                     yardsGained += 10; // 10, 20
                 }
             }
+        } else if(type === "sack" && zones < 0) {
+            yardsGained = 7 * delta;
         }
 
         //console.log("currentZone", currentZone, "newZone", newZone, "yardsGained", yardsGained);
@@ -97,6 +122,15 @@ const useExpressGameTools = () => {
                 message = `${offenseTeam?.abbreviation} returns the punt`;
                 message += isTouchdown ? ` ${delta} zones for a TD!` : ` to zone ${newZone}`;
                 break;
+            case "sack":
+                message = `${offenseTeam?.abbreviation} is sacked`;
+                if(delta < 0) {
+                    message += ` for loss of ${-delta} zone${delta === -1 ? "" : "s"} to zone ${newZone}`;
+                    if(isSafety) message += ", SAFETY!"
+                } else {
+                    message += `, same zone.`;
+                }
+               break;
         }
 
         logPlayMutation.mutate({      
@@ -108,6 +142,7 @@ const useExpressGameTools = () => {
             teamId: offenseTeam?.teamId || "",
             logId: crypto.randomUUID(),
             TD: isTouchdown ? 1 : 0,
+            Safeties: isSafety ? 1 : 0,
             playMinute
         });
       }

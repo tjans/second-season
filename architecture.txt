@@ -6,6 +6,8 @@ TD (on pass/run/kickoff/punt)
 Track zoneYards gained/lost
 swap possession function
 Check for end of quarter/half/etc after adjusting clock
+Playcalling
+Plays that started in zone 8
 
 expressGames (gameId, leagueId):
     gameId
