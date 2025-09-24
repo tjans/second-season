@@ -44,7 +44,7 @@ import ExpressRun from "./pages/Express/ExpressRun";
 import ExpressFieldGoal from "./pages/Express/ExpressFieldGoal";
 import ExpressPunt from "./pages/Express/ExpressPunt";
 import ExpressPat from "./pages/Express/ExpressPat";
-import ExpressStats from "./pages/Express/Template";
+import ExpressStats from "./pages/Express/ExpressStats";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
