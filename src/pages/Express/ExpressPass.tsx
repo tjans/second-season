@@ -9,7 +9,7 @@ import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
 
 export default function ExpressPass() {
-  const {offenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId} = useExpressGameTools();
+  const {offenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId, situation} = useExpressGameTools();
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>(null);
   
   const navigate = useNavigate();
@@ -21,8 +21,17 @@ export default function ExpressPass() {
       formState: { errors },
     } = useForm<FormData>();
 
+    const {
+      register: intRegister,
+      handleSubmit: handleIntSubmit,
+      formState: { errors: intErrors },
+    } = useForm<IntFormData>();
+
   type FormData = {
     zones: string;
+  }
+  type IntFormData = {
+    interceptionZone: string;
   }
 
   const handleIncomplete = () => {
@@ -59,10 +68,18 @@ export default function ExpressPass() {
     navigate(gameUrl());
   } 
 
+  const onIntSubmit = (data: IntFormData) => {
+    console.log(data)
+  }
+
   return (
     <>
       <ContentWrapper>
-        <div className="text-center"><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
+        <div className="text-center">
+          <div><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
+          <div><span className="font-bold">Current Zone:</span> {situation.currentZone}</div>
+        </div>
+
         <div className="text-center mt-2">
           What was the result of the pass play? <span className="text-red-500 block">Plays where drive started in zone 8</span>
 
@@ -98,8 +115,24 @@ export default function ExpressPass() {
           }
 
           {result == "INT" && 
-            <Button onClick={() => null} color="info">Confirm Interception</Button>
-          }
+            <>
+            <section>
+                <form onSubmit={handleIntSubmit(onIntSubmit)}>
+                    <TextInput
+                        label="What zone did the interception (and return) end in?"
+                        name="interceptionZone"
+                        register={intRegister}
+                        error={intErrors.interceptionZone}
+                        type="number"
+                        required
+                        rules={{
+                          required: "Interception zone is required"
+                        }}
+                    />                    
+                    <Button type="submit">Submit</Button>
+                </form>
+            </section>
+            </>          }
 
           {result == "SACK" && 
             <div className="flex gap-2 justify-center">
