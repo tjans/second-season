@@ -33,7 +33,8 @@ export default function ExpressKickoff() {
       date: new Date().toISOString(),
       gameId: game.gameId,
       yardsGained: null,
-      teamId: defenseTeam.teamId,
+      defenseTeamId: defenseTeam.teamId,
+      offenseTeamId: offenseTeam.teamId,
       logId: crypto.randomUUID(),
       playMinute
     });

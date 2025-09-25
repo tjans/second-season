@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 export default function ExpressPat() {
-  const {game, offenseTeam, homeTeam, gameUrl} = useExpressGameTools();
+  const {game, offenseTeam, defenseTeam, homeTeam, gameUrl} = useExpressGameTools();
   const [result, setResult] = useState<"PAT" | "2PT" | null>(null);
   
   const navigate = useNavigate();
@@ -39,7 +39,8 @@ export default function ExpressPat() {
       date: new Date().toISOString(),
       gameId: game.gameId,
       yardsGained: null,
-      teamId: offenseTeam.teamId,
+      offenseTeamId: offenseTeam.teamId,
+      defenseTeamId: defenseTeam.teamId,
       logId: crypto.randomUUID(),
       playMinute: gameAfterPlay.situation.minute,
     });
@@ -68,7 +69,8 @@ export default function ExpressPat() {
       date: new Date().toISOString(),
       gameId: game.gameId,
       yardsGained: null,
-      teamId: offenseTeam.teamId,
+      offenseTeamId: offenseTeam.teamId,
+      defenseTeamId: defenseTeam.teamId,
       logId: crypto.randomUUID(),
       playMinute: gameAfterPlay.situation.minute,
     });

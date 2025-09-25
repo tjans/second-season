@@ -10,8 +10,13 @@ export type PlayLog = {
     playMinute: number;
     message: string;
     date: string; // ISO string
+
+    offenseTeamId: string;
+    defenseTeamId: string;
+    
     yardsGained: number | null; // each zone is worth 10 or 15, so this stores how many yards gained/lost
     TD?: number;
+    InterceptionTD?: number;
     Safeties?: number;
-    teamId: string | null; // Team associated with the play, if any
+    Interceptions?: number;
 };

@@ -7,9 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
+import { SelectInput } from '@/components/Elements/SelectInput';
 
 export default function ExpressPass() {
-  const {offenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId, situation} = useExpressGameTools();
+  const {offenseTeam, defenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId, situation} = useExpressGameTools();
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>(null);
   
   const navigate = useNavigate();
@@ -49,7 +50,8 @@ export default function ExpressPass() {
             date: new Date().toISOString(),
             gameId: gameId,
             yardsGained: 0,
-            teamId: offenseTeam?.teamId || "",
+            offenseTeamId: offenseTeam.teamId,
+            defenseTeamId: defenseTeam.teamId,
             logId: crypto.randomUUID(),
             TD: 0,
             playMinute
@@ -69,9 +71,12 @@ export default function ExpressPass() {
   } 
 
   const onIntSubmit = (data: IntFormData) => {
-    console.log(data)
-  }
-
+    let usesTime = true;
+    let setZone = true;
+    moveBall(Number(data.interceptionZone), "interception", usesTime, setZone);
+    navigate(gameUrl());
+  } 
+  
   return (
     <>
       <ContentWrapper>
@@ -84,10 +89,10 @@ export default function ExpressPass() {
           What was the result of the pass play? <span className="text-red-500 block">Plays where drive started in zone 8</span>
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
-            <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">Complete</Button>
-            <Button onClick={() => setResult("INC")} variant={result=="INC" ? "filled" : "outlined"} className="w-24">Incomplete</Button>
-            <Button onClick={() => setResult("INT")} variant={result=="INT" ? "filled" : "outlined"} className="w-24">Intercepted</Button>
-            <Button onClick={() => setResult("SACK")} variant={result=="SACK" ? "filled" : "outlined"} className="w-24">Sack</Button>
+            <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">CMP</Button>
+            <Button onClick={() => setResult("INC")} variant={result=="INC" ? "filled" : "outlined"} className="w-24">INC</Button>
+            <Button onClick={() => setResult("INT")} variant={result=="INT" ? "filled" : "outlined"} className="w-24">INT</Button>
+            <Button onClick={() => setResult("SACK")} variant={result=="SACK" ? "filled" : "outlined"} className="w-24">SACK</Button>
             <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
           </div>
           
@@ -118,18 +123,30 @@ export default function ExpressPass() {
             <>
             <section>
                 <form onSubmit={handleIntSubmit(onIntSubmit)}>
-                    <TextInput
-                        label="What zone did the interception (and return) end in?"
-                        name="interceptionZone"
-                        register={intRegister}
-                        error={intErrors.interceptionZone}
-                        type="number"
-                        required
-                        rules={{
-                          required: "Interception zone is required"
-                        }}
-                    />                    
-                    <Button type="submit">Submit</Button>
+                   <SelectInput
+                    label="Which zone did the interception (and return) end in?"
+                    name="interceptionZone"
+                    register={intRegister}
+                    error={intErrors.interceptionZone}
+                    required={true}
+                    options={[
+                      { value: '8', label: "Zone " + (situation.currentZone == 8 ? '8 (current)' : '8') },
+                      { value: '7', label: "Zone " + (situation.currentZone == 7 ? '7 (current)' : '7') },
+                      { value: '6', label: "Zone " + (situation.currentZone == 6 ? '6 (current)' : '6') },
+                      { value: '5', label: "Zone " + (situation.currentZone == 5 ? '5 (current)' : '5') },
+                      { value: '4', label: "Zone " + (situation.currentZone == 4 ? '4 (current)' : '4') },
+                      { value: '3', label: "Zone " + (situation.currentZone == 3 ? '3 (current)' : '3') },
+                      { value: '2', label: "Zone " + (situation.currentZone == 2 ? '2 (current)' : '2') },
+                      { value: '1', label: "Zone " + (situation.currentZone == 1 ? '1 (current)' : '1') },
+                      { value: '0', label: 'Zone 0 - Defensive TD' },
+                    ]}
+                    defaultValue=""
+                    placeholder="Select final zone"
+                    rules={{
+                      required: "Final zone is required"
+                    }}
+                  />
+                  <Button type="submit">Submit</Button>
                 </form>
             </section>
             </>          }

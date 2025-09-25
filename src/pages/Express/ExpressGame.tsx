@@ -51,7 +51,8 @@ export default function ExpressGame() {
       date: new Date().toISOString(),
       gameId: gameId,
       yardsGained: null,
-      teamId: kickingTeam.teamId,
+      offenseTeamId: kickingTeam.teamId,
+      defenseTeamId: receivingTeam.teamId,
       logId: crypto.randomUUID(),
       playMinute
     }
@@ -124,9 +125,11 @@ export default function ExpressGame() {
 
         {game.situation.mode == "PREGAME" && 
           <>
-          <div>Who will receive?</div>
-          <Button onClick={() => handleCoinFlip(awayTeam.teamId)}>{awayTeam.abbreviation}</Button>
-          <Button onClick={() => handleCoinFlip(homeTeam.teamId)}>{homeTeam.abbreviation}</Button>
+          <div className="text-center font-bold mb-4">Who will receive?</div>
+          <div className="mb-4 flex justify-center items-center gap-2">
+            <Button onClick={() => handleCoinFlip(awayTeam.teamId)}>{awayTeam.abbreviation}</Button>
+            <Button onClick={() => handleCoinFlip(homeTeam.teamId)}>{homeTeam.abbreviation}</Button>
+          </div>
           </>
         }        
 
@@ -143,30 +146,30 @@ export default function ExpressGame() {
         }
 
         {game.situation.mode == "DRIVE" && 
-          <>
-          <ButtonLink to={gameUrl("pass")} className="mr-2 mb-2">
-            Pass
-          </ButtonLink>
+          <div className="mb-4 flex justify-center items-center">
+            <ButtonLink to={gameUrl("pass")} className="mr-2 mb-2">
+              Pass
+            </ButtonLink>
 
-          <ButtonLink to={gameUrl("run")} className="mr-2 mb-2">
-            Run
-          </ButtonLink>
+            <ButtonLink to={gameUrl("run")} className="mr-2 mb-2">
+              Run
+            </ButtonLink>
 
-          <ButtonLink to={gameUrl("fg")} className="mr-2 mb-2">
-            FG
-          </ButtonLink>
+            <ButtonLink to={gameUrl("fg")} className="mr-2 mb-2">
+              FG
+            </ButtonLink>
 
-          <ButtonLink to={gameUrl("punt")} className="mr-2 mb-2">
-            Punt
-          </ButtonLink>
+            <ButtonLink to={gameUrl("punt")} className="mr-2 mb-2">
+              Punt
+            </ButtonLink>
 
-          <Button onClick={handleTurnoverOnDowns} className="mr-2 mb-2">
-            Turnover on Downs
-          </Button>
-          </>
+            <Button onClick={handleTurnoverOnDowns} className="mr-2 mb-2">
+              TOD
+            </Button>
+          </div>
         }
 
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <ButtonLink color="info" to={gameUrl("stats")} className="mr-2">
             Stats
           </ButtonLink>
@@ -177,7 +180,7 @@ export default function ExpressGame() {
         </div>
 
         {playLogs.data.map(log => {
-          return <div key={log.logId}>{clockDisplay(log.playMinute)} - {log.message}</div>
+          return <div className="text-center" key={log.logId}><span className="font-bold">{clockDisplay(log.playMinute)}</span> - {log.message}</div>
         })}
 
       </ContentWrapper>
