@@ -55,6 +55,7 @@ const useExpressGameTools = () => {
         
         if(usesTime) gameAfterPlay.data.situation.minute++;
         
+        // Check for TD or safety
         if(newZone === 9) {
             isTouchdown = true;
             gameAfterPlay.data.situation.mode = "PAT";
@@ -105,32 +106,34 @@ const useExpressGameTools = () => {
         }
 
         // Save the game situation changes
-        saveGameMutation.mutate(gameAfterPlay.data);
+        //TODO: saveGameMutation.mutate(gameAfterPlay.data);
 
-        // yardsGained needs to get calculated based on old zone and new zone.  For every zone moved into, it's either 10 yards or 15.
-        // Zones 1, 2, 7, 8 are worth 10 yards
-        // Zones 3, 4, 5, 6 are worth 15 yards
-        // Zones 0 and 9 are endzones.  If a score happens from the 8th zone, only add the yards if you haven't already logged the yards
-        // Basically if you START THE DRIVE in 8 and score, you get 10 yards, otherwise the 10 was already logged when you moved into the 
-        // 8th zone on a previous play.
-        // Sacks and losses do not remove yards
-        //let yardsGained = 0; // Temporary for now
-        
         let yardsGained = 0;
         
         // Tally the "actual yards" gained or lost.  Skip this for interceptions, and handle sacks a little differently.
-        if(zones > 0 && type != "interception") {
-            for(let z = currentZone + 1; z <= newZone; z++) {
-                if(z === 0 || z === 9) {
-                    yardsGained += 10; // endzones
-                } else if(z >= 3 && z <= 6) {
-                    yardsGained += 15; // 30, 40, 50
+        // We need to track whether we've included the 10 yards for entering zone 8.  If they enter zone 8 on a drive, you don't include it if they score from 8 since you've already tallied it.
+        // Basically this can be solved by only tallying yards for zones you've just left, not the zone you're entering.
+
+        if(zones > 0 && type != "interception") { // moving forward and not an interception
+            for(let z = currentZone; z < newZone; z++) {
+                if(z === 1 || z === 2 || z === 7 || z === 8) {
+                    yardsGained += 10;
                 } else {
-                    yardsGained += 10; // 10, 20
+                    yardsGained += 15;
                 }
             }
-        } else if(type === "sack" && zones < 0) {
-            yardsGained = 7 * delta;
+        } else if(zones < 0 && type != "interception") { // moving backwards and not an interception
+            if(type === "sack") {
+                yardsGained = 7 * delta; // sacks are a flat 7 yards per zone lost
+            } else {
+                for(let z = currentZone; z > newZone; z--) {
+                    if(z === 8 || z === 7 || z === 2 || z === 1) {
+                        yardsGained -= 10;
+                    } else {
+                        yardsGained -= 15;
+                    }
+                }
+            }
         }
 
         let message = "UNKNOWN PLAY TYPE";
@@ -187,11 +190,17 @@ const useExpressGameTools = () => {
 
       // Clock display formatter
       const clockDisplay = (minute: number) => minute.toString().padStart(2, "0") + ":00";
+      const yardDisplay = (zone: number) => {
+        if(zone == 0) return "SAFETY";
+        if(zone === 9) return "TD";
+        return zone;
+      }
 
     return {
         gameUrl,
         moveBall,
         clockDisplay,
+        yardDisplay,
         gameTools: game,
         game: game.data,
         situation: game.data.situation,

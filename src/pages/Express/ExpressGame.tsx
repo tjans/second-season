@@ -23,7 +23,7 @@ import { PlayLog } from '@/types/PlayLog';
 // This is the main entry point for a game
 export default function ExpressGame() {
 
-  const {game, awayTeam, homeTeam, gameId, gameUrl, saveGameMutation, logPlayMutation, undoMutation, clockDisplay} = useExpressGameTools();
+  const {game, awayTeam, homeTeam, gameId, gameUrl, saveGameMutation, logPlayMutation, undoMutation, clockDisplay, yardDisplay} = useExpressGameTools();
   const navigate = useNavigate(); 
   const playLogs = usePlayLogs(gameId);
 
@@ -109,7 +109,9 @@ export default function ExpressGame() {
             </tr>
 
             <tr>
-              <td className="px-2 text-center">Ball on {game.situation.currentZone}</td>
+              <td className="px-2 text-center">
+                Ball on: {game.situation.currentZone == 0 || game.situation.currentZone == 9 ? "N/A" : game.situation.currentZone}
+              </td>
             </tr>
           </tbody>
         </table>
@@ -134,15 +136,19 @@ export default function ExpressGame() {
         }        
 
         {game.situation.mode == "KICKOFF" && 
+        <div className="mb-4 flex justify-center items-center gap-2">
           <ButtonLink to={gameUrl("kickoff")} className="mr-2 mb-2">
             Kickoff
           </ButtonLink>
+          </div>
         }
 
          {game.situation.mode == "PAT" && 
+         <div className="mb-4 flex justify-center items-center gap-2">
           <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
             PAT / 2PT
           </ButtonLink>
+          </div>
         }
 
         {game.situation.mode == "DRIVE" && 

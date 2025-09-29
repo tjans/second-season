@@ -13,7 +13,7 @@ export type ExpressGameState = {
     homeScore: number;
     awayScore: number;
     currentZone?: number | null;
-    driveStartZone?: number | null;
+    hasIncludedZone8?: boolean;
     minute: number;
     possessionId?: string | null;
     quarter?: 1 | 2 | 3 | 4 | "OT";

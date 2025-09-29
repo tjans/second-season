@@ -21,7 +21,7 @@ export default function ExpressStats() {
     
 
     for (const item of playLogs.data) {
-      if (item.teamId === homeTeam.teamId) {
+      if (item.offenseTeamId === homeTeam.teamId) {
         homeStats.push(item);
       } else {
         awayStats.push(item);
