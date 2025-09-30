@@ -204,9 +204,32 @@ export default function ExpressGame() {
           </Button>
         </div>
 
-        {playLogs.data.map(log => {
+
+
+        <table className="w-full mx-auto mb-4 table table-striped">
+          <thead>
+            <tr className="bg-gray-300">
+              <th className="p-1">Time</th>
+              <th>Play</th>
+            </tr>
+          </thead>
+          
+          <tbody>          
+
+          {playLogs.data.map(log => {
+            return <tr className="even:bg-gray-200" key={log.logId}>
+                <td className="font-bold p-1">{clockDisplay(log.playMinute)}</td>
+                <td>{log.message}</td>
+              </tr>
+          })}
+            
+          </tbody>
+
+        </table>
+
+        {/* {playLogs.data.map(log => {
           return <div className="text-center" key={log.logId}><span className="font-bold">{clockDisplay(log.playMinute)}</span> - {log.message}</div>
-        })}
+        })} */}
 
       </ContentWrapper>
     </>

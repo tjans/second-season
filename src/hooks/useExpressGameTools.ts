@@ -193,7 +193,7 @@ const useExpressGameTools = () => {
       }
 
       // Clock display formatter
-      const clockDisplay = (minute: number) => minute.toString().padStart(2, "0") + ":00";
+      const clockDisplay = (minute: number) => minute.toString() + ":00";
       const yardDisplay = (zone: number) => {
         if(zone == 0) return "SAFETY";
         if(zone === 9) return "TD";

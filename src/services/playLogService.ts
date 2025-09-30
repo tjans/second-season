@@ -12,7 +12,7 @@ export default {
         let logs = await db.playLogs.where({ gameId }).toArray();
         
         // sort by date
-        logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         return logs;
     },
 
