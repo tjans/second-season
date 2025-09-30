@@ -11,8 +11,11 @@ export default function ExpressStats() {
   const playLogs = usePlayLogs(gameId);
 
   usePageTitle("Express Stats");
-  let homeYards = 0;
-  let awayYards = 0;
+  let homePassingYards = 0;
+  let awayPassingYards = 0;
+  let homeRushingYards = 0;
+  let awayRushingYards = 0;
+
   const { homeStats, awayStats } = useMemo(() => {
     if (!playLogs.data) return { homeStats: [], awayStats: [] };
 
@@ -36,29 +39,32 @@ export default function ExpressStats() {
       <ContentWrapper>
        <div className="text-2xl font-bold">Home</div>
        {homeStats.map((log) => {
-        homeYards += log.yardsGained ?? 0;
+        homePassingYards += log.passYardsGained ?? 0;
+        
         return;
         return  (
           <div key={log.logId} className="mb-2">
-            <div>{log.message}: ({log.yardsGained ?? 0})</div>
+            <div>{log.message}: ({log.passYardsGained ?? 0})</div>
           </div>
         )
       })}
 
-      Total: {homeYards} yards
+      <div>Passing: {homePassingYards} yards</div>
+      <div>Rushing: {homeRushingYards} yards</div>
 
       <div className="text-2xl mt-4 font-bold">Away</div>
        {awayStats.map((log) => {
-        awayYards += log.yardsGained ?? 0;
+        awayPassingYards += log.passYardsGained ?? 0;
         return;
         return  (
           <div key={log.logId} className="mb-2">
-            <div>{log.message}: ({log.yardsGained ?? 0})</div>
+            <div>{log.message}: ({log.passYardsGained ?? 0})</div>
           </div>
         )
       })}
 
-      Total: {awayYards} yards
+      <div>Passing: {awayPassingYards} yards</div>
+      <div>Rushing: {awayRushingYards} yards</div>
 
        <div className="text-center">
           <ButtonLink to={gameUrl()} color="secondary" className="ml-2">Cancel</ButtonLink>

@@ -14,7 +14,11 @@ export type PlayLog = {
     offenseTeamId: string;
     defenseTeamId: string;
     
-    yardsGained: number | null; // each zone is worth 10 or 15, so this stores how many yards gained/lost
+    passYardsGained?: number | null; // each zone is worth 10 or 15, so this stores how many yards gained/lost
+    rushYardsGained?: number | null; // each zone is worth 10 or 15, so this stores how many yards gained/lost
+    passZonesGained?: number | null; // how many zones were gained/lost on a pass play
+    rushZonesGained?: number | null; // how many zones were gained/lost on a rush play
+    
     TD?: number;
     InterceptionTD?: number;
     Safeties?: number;

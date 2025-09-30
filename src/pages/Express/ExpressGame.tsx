@@ -23,7 +23,7 @@ import { PlayLog } from '@/types/PlayLog';
 // This is the main entry point for a game
 export default function ExpressGame() {
 
-  const {game, awayTeam, homeTeam, gameId, gameUrl, saveGameMutation, logPlayMutation, undoMutation, clockDisplay, yardDisplay} = useExpressGameTools();
+  const {game, awayTeam, homeTeam, gameId, gameUrl, saveGameMutation, logPlayMutation, undoMutation, clockDisplay, offenseTeam, defenseTeam} = useExpressGameTools();
   const navigate = useNavigate(); 
   const playLogs = usePlayLogs(gameId);
 
@@ -50,7 +50,6 @@ export default function ExpressGame() {
       message: `${receivingTeam.abbreviation} will receive the kickoff`,
       date: new Date().toISOString(),
       gameId: gameId,
-      yardsGained: null,
       offenseTeamId: kickingTeam.teamId,
       defenseTeamId: receivingTeam.teamId,
       logId: crypto.randomUUID(),
@@ -61,11 +60,26 @@ export default function ExpressGame() {
     navigate(gameUrl("kickoff"));
   }
 
-  const handleTurnoverOnDowns = () => {
-    // Increase minute
-    // Change possession
-    // Recalculate new zone
-    // Switch quarters if necessary (maybe make a "update clock" function that handles this logic)
+  const handleSwapPossession = () => {
+    if(!game.situation.currentZone) return; // safety check
+
+    let gameAfterPlay = {...game};
+    gameAfterPlay.situation.possessionId = game.situation.possessionId == homeTeam.teamId ? awayTeam.teamId : homeTeam.teamId;
+    gameAfterPlay.situation.currentZone = 9 - game.situation.currentZone; // flip the zone
+    saveGameMutation.mutate(gameAfterPlay);
+
+     let playLog: PlayLog = {      
+      situation: game.situation,
+      message: `${defenseTeam.abbreviation} takes over at Zone ${gameAfterPlay.situation.currentZone}`,
+      date: new Date().toISOString(),
+      gameId: gameId,
+      offenseTeamId: defenseTeam.teamId,
+      defenseTeamId: offenseTeam.teamId,
+      logId: crypto.randomUUID(),
+      playMinute: game.situation.minute
+    }
+
+    logPlayMutation.mutate(playLog);
   }
 
   const handleUndo = () => {
@@ -152,6 +166,7 @@ export default function ExpressGame() {
         }
 
         {game.situation.mode == "DRIVE" && 
+          <>
           <div className="mb-4 flex justify-center items-center">
             <ButtonLink to={gameUrl("pass")} className="mr-2 mb-2">
               Pass
@@ -168,11 +183,15 @@ export default function ExpressGame() {
             <ButtonLink to={gameUrl("punt")} className="mr-2 mb-2">
               Punt
             </ButtonLink>
+          </div>
 
-            <Button onClick={handleTurnoverOnDowns} className="mr-2 mb-2">
-              TOD
+          <div className="mb-4 flex justify-center items-center">
+            <Button onClick={handleSwapPossession} color="warning" className="mr-2 mb-2">
+              Swap Possession
             </Button>
           </div>
+
+            </>
         }
 
         <div className="mb-8 text-center">

@@ -40,7 +40,7 @@ export default function Layout() {
       ) : (
         <>
           <div 
-            className="flex items-center justify-center gap-3 p-4 font-bold text-center shadow shadow-slate-400"
+            className="flex items-center justify-center gap-3 p-4 font-bold text-center"
             style={getHeaderStyles()}
           >
             {APP_NAME}

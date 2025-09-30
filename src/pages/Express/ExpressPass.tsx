@@ -49,7 +49,6 @@ export default function ExpressPass() {
             message: `${offenseTeam?.abbreviation} throws incomplete pass`,
             date: new Date().toISOString(),
             gameId: gameId,
-            yardsGained: 0,
             offenseTeamId: offenseTeam.teamId,
             defenseTeamId: defenseTeam.teamId,
             logId: crypto.randomUUID(),
@@ -86,7 +85,6 @@ export default function ExpressPass() {
         </div>
 
         <div className="text-center mt-2">
-          What was the result of the pass play? <span className="text-red-500 block">Plays where drive started in zone 8</span>
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
             <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">CMP</Button>

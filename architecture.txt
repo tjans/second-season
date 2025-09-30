@@ -1,13 +1,10 @@
 Punt
 Fumble (on kickoff as well)
-Interception
-Safety
-TD (on pass/run/kickoff/punt)
-Track zoneYards gained/lost
 swap possession function
 Check for end of quarter/half/etc after adjusting clock
 Playcalling
-Plays that started in zone 8
+Stats Screen (general)
+Stats Screen (calculated)
 
 expressGames (gameId, leagueId):
     gameId

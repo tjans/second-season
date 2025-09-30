@@ -169,14 +169,18 @@ const useExpressGameTools = () => {
                 message += isInterceptionTD ? ` returned ${delta} zones for a TD!` : ` returned to zone ${newZone}`;
                 break;
         }
-        
+
+        let rushYardsGained = type === "run" ? yardsGained : null;
+        let passYardsGained = type === "pass" || type==="sack" ? yardsGained : null;
+
         // Make sure the stats page doesn't inlcude TD that are interceptions returns since it's recorded as an INT for the offense, and isTD is true, but the TD is actually for the defense.
         logPlayMutation.mutate({      
             situation: gameAfterPlay.data.situation,
             message,
             date: new Date().toISOString(),
             gameId: gameId,
-            yardsGained,
+            passYardsGained: passYardsGained,
+            rushYardsGained: rushYardsGained,
             offenseTeamId,
             defenseTeamId,
             logId: crypto.randomUUID(),
