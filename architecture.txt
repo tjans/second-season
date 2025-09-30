@@ -1,10 +1,13 @@
+Run
+FG
 Punt
 Fumble (on kickoff as well)
-swap possession function
 Check for end of quarter/half/etc after adjusting clock
 Playcalling
 Stats Screen (general)
 Stats Screen (calculated)
+Styling/Game day
+Dark mode
 
 expressGames (gameId, leagueId):
     gameId

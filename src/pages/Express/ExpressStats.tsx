@@ -40,7 +40,7 @@ export default function ExpressStats() {
        <div className="text-2xl font-bold">Home</div>
        {homeStats.map((log) => {
         homePassingYards += log.passYardsGained ?? 0;
-        
+        homeRushingYards += log.rushYardsGained ?? 0;
         return;
         return  (
           <div key={log.logId} className="mb-2">
@@ -55,6 +55,7 @@ export default function ExpressStats() {
       <div className="text-2xl mt-4 font-bold">Away</div>
        {awayStats.map((log) => {
         awayPassingYards += log.passYardsGained ?? 0;
+        awayRushingYards += log.rushYardsGained ?? 0;
         return;
         return  (
           <div key={log.logId} className="mb-2">

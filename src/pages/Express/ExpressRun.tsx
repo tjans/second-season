@@ -3,51 +3,66 @@ import ContentWrapper from "@/components/ContentWrapper";
 import Button from '@/components/Elements/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import ButtonLink from '@/components/Elements/ButtonLink';
-import { useLogPlay } from '@/queries/playLogQueries';
-import { useSaveGame } from '@/queries/expressGameQueries';
 import { useNavigate } from 'react-router-dom';
+import { TextInput } from '@/components/Elements/TextInput';
+import { useForm } from 'react-hook-form';
 
 export default function ExpressRun() {
-  const {game, offenseTeam, defenseTeam, gameId, gameUrl} = useExpressGameTools();
-  
+  const {offenseTeam, gameUrl, moveBall, situation} = useExpressGameTools();
+    
   const navigate = useNavigate();
   usePageTitle("Express Run");
 
-  const saveGameMutation = useSaveGame();
-  const logPlayMutation = useLogPlay();
+  const {
+      register,
+      handleSubmit,
+      formState: { errors },
+    } = useForm<FormData>();
 
-  const handleZoneSelect = (zone: number) => {
-    // let gameAfterPlay = {...game};
-
-    // // Check for TD!!
-    // let playMinute = game.situation.minute;  // store this so we can add it to the play log
-    // gameAfterPlay.situation.minute++;
-    // gameAfterPlay.situation.currentZone = zone;
-    // gameAfterPlay.situation.mode = "DRIVE";
-    // gameAfterPlay.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
-    // saveGameMutation.mutate(gameAfterPlay);
-
-    // logPlayMutation.mutate({      
-    //   situation: game.situation,
-    //   message: `${defenseTeam.abbreviation} returns the kick to zone ${zone}`,
-    //   date: new Date().toISOString(),
-    //   gameId: game.gameId,
-    //   yardsGained: null,
-    //   teamId: defenseTeam.teamId,
-    //   logId: crypto.randomUUID(),
-    //   playMinute
-    // });
-
-    // navigate(gameUrl());
+  type FormData = {
+    zones: string;
   }
-
+  
+  const onSubmit = (data: FormData) => {
+    moveBall(Number(data.zones), "run", true); // I don't think the clock stops, each play takes a minute regardless.    
+    navigate(gameUrl());
+  } 
+  
   return (
     <>
       <ContentWrapper>
-        <div className="text-center"><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
+        <div className="text-center">
+          <div><span className="font-bold">Possession:</span> {offenseTeam.abbreviation}</div>
+          <div><span className="font-bold">Current Zone:</span> {situation.currentZone}</div>
+        </div>
+
+        <div className="text-center mt-2">                    
+
+            <section>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <TextInput
+                        label="How many zones did the run sequence gain?"
+                        name="zones"
+                        register={register}
+                        error={errors.zones}
+                        type="number"
+                        required
+                        rules={{
+                          required: "Zones is required"
+                        }}
+                    />    
+
+                    <div className="flex justify-center mt-4 gap-2 mb-4">
+                      <Button type="submit" color="info">Confirm RUN</Button>
+                      <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                    </div>                
+                </form>
+            </section>
+                    
+        </div>
         
         <div className="text-center">
-          <ButtonLink to={gameUrl()} color="secondary" className="ml-2">Cancel</ButtonLink>
+          
         </div>
       </ContentWrapper>
     </>

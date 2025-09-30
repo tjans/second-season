@@ -91,14 +91,13 @@ export default function ExpressPass() {
             <Button onClick={() => setResult("INC")} variant={result=="INC" ? "filled" : "outlined"} className="w-24">INC</Button>
             <Button onClick={() => setResult("INT")} variant={result=="INT" ? "filled" : "outlined"} className="w-24">INT</Button>
             <Button onClick={() => setResult("SACK")} variant={result=="SACK" ? "filled" : "outlined"} className="w-24">SACK</Button>
-            <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
           </div>
           
           {result == "CMP" && <>
             <section>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <TextInput
-                        label="How many zones did the pass gain?"
+                        label="How many zones did the pass sequence gain?"
                         name="zones"
                         register={register}
                         error={errors.zones}
@@ -108,7 +107,12 @@ export default function ExpressPass() {
                           required: "Zones is required"
                         }}
                     />                    
-                    <Button type="submit">Submit</Button>
+
+
+                    <div className="flex justify-center mt-4 gap-2 mb-4">
+                      <Button type="submit" color="info">Confirm CMP</Button>
+                      <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                    </div>
                 </form>
             </section>
           </>}
@@ -144,7 +148,10 @@ export default function ExpressPass() {
                       required: "Final zone is required"
                     }}
                   />
-                  <Button type="submit">Submit</Button>
+                  <div className="flex justify-center mt-4 gap-2 mb-4">
+                      <Button type="submit" color="info">Confirm INT</Button>
+                      <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                    </div>
                 </form>
             </section>
             </>          }
