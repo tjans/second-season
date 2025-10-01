@@ -1,8 +1,6 @@
 import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
 import { useLogPlay } from "@/queries/playLogQueries";
 import { useTeam } from "@/queries/teamQueries";
-import { P } from "node_modules/framer-motion/dist/types.d-Cjd591yU";
-import { use } from "react";
 import { useParams } from "react-router-dom";
 
 const useExpressGameTools = () => {
@@ -139,12 +137,12 @@ const useExpressGameTools = () => {
         let message = "UNKNOWN PLAY TYPE";
         switch(type) {
             case "pass":
-                message = `${offenseTeam?.abbreviation} pass sequence ${delta} zone${delta === 1 ? "" : "s"}`;
-                message += isTouchdown ? ` for a TD!` : ``;
+                message = `${offenseTeam?.abbreviation} pass sequence for ${delta} zone${delta === 1 ? "" : "s"}`;
+                message += isTouchdown ? `, TD!` : ``;
                 break;
             case "run":
-                message = `${offenseTeam?.abbreviation} run sequence ${delta} zone${delta === 1 ? "" : "s"}`;
-                message += isTouchdown ? ` for a TD!` : ``;
+                message = `${offenseTeam?.abbreviation} run sequence for ${delta} zone${delta === 1 ? "" : "s"}`;
+                message += isTouchdown ? `, TD!` : ``;
                 break;
             case "KR":
                 message = `${offenseTeam?.abbreviation} returns the kickoff`;
@@ -157,7 +155,7 @@ const useExpressGameTools = () => {
             case "sack":
                 message = `${offenseTeam?.abbreviation} is sacked`;
                 if(delta < 0) {
-                    message += ` for loss of ${-delta} zone${delta === -1 ? "" : "s"} to zone ${newZone}`;
+                    message += ` for loss of ${delta} zone${delta === -1 ? "" : "s"} to zone ${newZone}`;
                     if(isSafety) message += ", SAFETY!"
                 } else {
                     message += `, same zone.`;
@@ -200,11 +198,16 @@ const useExpressGameTools = () => {
         return zone;
       }
 
+      const getReverseZone = (zone: number) : number => {
+        return (9 - zone);
+      }
+
     return {
         gameUrl,
         moveBall,
         clockDisplay,
         yardDisplay,
+        getReverseZone,
         gameTools: game,
         game: game.data,
         situation: game.data.situation,

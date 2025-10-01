@@ -118,7 +118,10 @@ export default function ExpressPass() {
           </>}
 
           {result == "INC" && 
-            <Button onClick={handleIncomplete} color="info">Confirm Incomplete</Button>
+            <div className="flex justify-center mt-4 gap-2 mb-4">
+              <Button onClick={handleIncomplete} color="info">Confirm INC</Button>
+              <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+            </div>
           }
 
           {result == "INT" && 
@@ -160,6 +163,7 @@ export default function ExpressPass() {
             <div className="flex gap-2 justify-center">
               <Button onClick={() => handleSack(false)} color="info">Same zone</Button>
               <Button onClick={() => handleSack(true)} color="info">1-zone Loss</Button>
+              <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
             </div>
           }
           

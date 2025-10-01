@@ -1,5 +1,3 @@
-Run
-FG
 Punt
 Fumble (on kickoff as well)
 Check for end of quarter/half/etc after adjusting clock
