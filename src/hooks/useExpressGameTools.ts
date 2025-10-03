@@ -21,7 +21,7 @@ const useExpressGameTools = () => {
       const gameUrl = (url:string = "") => `/express/game/${gameId}/${url}`;
 
       /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
-      const moveBall = async (zones: number, type: "pass" | "sack" | "interception" | "run" | "KR" | "PR", usesTime: boolean, setZone: boolean = false) : Promise<void> => {
+      const moveBall = async (zones: number, type: "pass" | "sack" | "interception" | "run" | "punt", usesTime: boolean, setZone: boolean = false) : Promise<void> => {
         const currentZone = game.data.situation.currentZone ?? 0;
         let gameAfterPlay = {...game};
         let playMinute = game.data.situation.minute; // store this for the log to indicate what time the play happened
@@ -33,37 +33,39 @@ const useExpressGameTools = () => {
         if(!defenseTeamId) throw new Error("Defense team is required");
         if(!gameAfterPlay.data.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
 
+        let isPunt = type === "punt";
         let isTouchdown = false;
-        let isInterceptionTD = false;
         let isSafety = false;
         let isInterception = false;
         let newZone = zones + gameAfterPlay.data.situation.currentZone;
          
         // setZone means we're placing the ball, not setting it relative to current zone
         if(setZone) {
-            newZone = zones;
+            newZone = zones > 0
+                ? Math.min(9, zones)
+                : Math.max(0, zones);
         } else {
             newZone = zones > 0
                 ? Math.min(9, newZone)
                 : Math.max(0, newZone);
         }
-
-        gameAfterPlay.data.situation.currentZone = newZone;
+                
         let delta = newZone - currentZone;
-        
+
+        // TIMING CHECK
         if(usesTime) gameAfterPlay.data.situation.minute++;
         
-        // Check for TD or safety
-        if(newZone === 9) {
+        // SCORING CHECK - TD, SAFETY
+        if(newZone === 9 && !isPunt) {
             isTouchdown = true;
             gameAfterPlay.data.situation.mode = "PAT";
-
+            
             if(offenseTeam.teamId == homeTeam.data.teamId) {
                 gameAfterPlay.data.situation.homeScore += 6;
             } else {
                 gameAfterPlay.data.situation.awayScore += 6;
-            }
-
+            }            
+           
         } else if(newZone === 0 && type === "sack") {
             isSafety = true;
             gameAfterPlay.data.situation.mode = "KICKOFF";
@@ -73,8 +75,8 @@ const useExpressGameTools = () => {
             } else {
                 gameAfterPlay.data.situation.homeScore += 2;
             }
-        } else if(newZone === 0 && type === "interception") {
-            isInterceptionTD = true;
+
+        } else if(newZone === 0 && (type === "interception" || isPunt)) {
             gameAfterPlay.data.situation.mode = "PAT";
 
             if(offenseTeam.teamId == homeTeam.data.teamId) {
@@ -95,24 +97,34 @@ const useExpressGameTools = () => {
                 new coin toss
         */
 
-        // If interception, we'd need to swap possession
-        if(type === "interception") {
+        // Check for POSSESSION CHANGE - interceptions and punts
+        if(type === "interception" || isPunt) {
             gameAfterPlay.data.situation.possessionId = defenseTeam?.teamId || "";
-            
-            // the new zone is relative to the offense, but we need to rotate the field because the defense is now on offense
-            gameAfterPlay.data.situation.currentZone = 9 - newZone;
         }
 
-        // Save the game situation changes
-        //TODO: saveGameMutation.mutate(gameAfterPlay.data);
-
-        let yardsGained = 0;
-        
-        // Tally the "actual yards" gained or lost.  Skip this for interceptions, and handle sacks a little differently.
+        // SET NEW ZONE (newZone is pre-flip, situation.currentZone is post-flip)
+        if(isPunt || type === "interception") {
+            // touchback on punt puts ball at zone 7 (check for punt touchback yard line?)
+            //newZone < 9 ? newZone : gameAfterPlay.data.situation.currentZone = 7; 
+            if(newZone === 9) {
+                gameAfterPlay.data.situation.currentZone = getReverseZone(7);
+            } else {
+                gameAfterPlay.data.situation.currentZone = getReverseZone(newZone);
+            }
+            
+        } else {
+            gameAfterPlay.data.situation.currentZone = newZone;
+        }
+               
+        // YARDAGE CHECK - Skip this for interceptions, and handle sacks a little differently.
         // We need to track whether we've included the 10 yards for entering zone 8.  If they enter zone 8 on a drive, you don't include it if they score from 8 since you've already tallied it.
         // Basically this can be solved by only tallying yards for zones you've just left, not the zone you're entering.
+        let yardsGained = 0;
 
-        if(zones > 0 && type != "interception") { // moving forward and not an interception
+        // Basically gain/loss of yards is tracked on normal drives, not interceptions or punts.
+        let isDriveGainLoss = type !== "interception" && !isPunt;
+
+        if(zones > 0 && isDriveGainLoss) { // moving forward and not an interception
             for(let z = currentZone; z < newZone; z++) {
                 if(z === 1 || z === 2 || z === 7 || z === 8) {
                     yardsGained += 10;
@@ -120,7 +132,7 @@ const useExpressGameTools = () => {
                     yardsGained += 15;
                 }
             }
-        } else if(zones < 0 && type != "interception") { // moving backwards and not an interception
+        } else if(zones < 0 && isDriveGainLoss) { // moving backwards and not an interception
             if(type === "sack") {
                 yardsGained = 7 * delta; // sacks are a flat 7 yards per zone lost
             } else {
@@ -134,24 +146,31 @@ const useExpressGameTools = () => {
             }
         }
 
+        // MESSAGE BUILDER - create the message for the play log based on what happened in the play
+        // At this point, newZone is the "pre-flipped" zone, situation.currentZone is the flipped zone if there was a possession change.
         let message = "UNKNOWN PLAY TYPE";
         switch(type) {
             case "pass":
                 message = `${offenseTeam?.abbreviation} pass sequence for ${delta} zone${delta === 1 ? "" : "s"}`;
                 message += isTouchdown ? `, TD!` : ``;
                 break;
+
             case "run":
                 message = `${offenseTeam?.abbreviation} run sequence for ${delta} zone${delta === 1 ? "" : "s"}`;
                 message += isTouchdown ? `, TD!` : ``;
                 break;
-            case "KR":
-                message = `${offenseTeam?.abbreviation} returns the kickoff`;
-                message += isTouchdown ? ` ${delta} zones for a TD!` : ` to zone ${newZone}`;
+
+            case "punt":
+                message = `${offenseTeam?.abbreviation} punts`;
+                if(newZone === 9) {
+                    message += " for a TOUCHBACK";
+                } else if(newZone === 0) {
+                    message += `, returned by ${defenseTeam?.abbreviation} for a TD!`;
+                } else {
+                    message += `, returned to zone ${newZone}`;
+                }
                 break;
-            case "PR":
-                message = `${offenseTeam?.abbreviation} returns the punt`;
-                message += isTouchdown ? ` ${delta} zones for a TD!` : ` to zone ${newZone}`;
-                break;
+
             case "sack":
                 message = `${offenseTeam?.abbreviation} is sacked`;
                 if(delta < 0) {
@@ -161,10 +180,11 @@ const useExpressGameTools = () => {
                     message += `, same zone.`;
                 }
                break;
+
             case "interception":
                 isInterception = true;
                 message = `${offenseTeam?.abbreviation} pass is intercepted, `;
-                message += isInterceptionTD ? ` returned ${delta} zones for a TD!` : ` returned to zone ${newZone}`;
+                message += newZone == 0 ? ` returned for a TD!` : ` returned to zone ${newZone}`;
                 break;
         }
 
@@ -183,7 +203,7 @@ const useExpressGameTools = () => {
             defenseTeamId,
             logId: crypto.randomUUID(),
             TD: isTouchdown ? 1 : 0,
-            InterceptionTD: isInterceptionTD ? 1 : 0,
+            InterceptionTD: type === "interception" && newZone == 0 ? 1 : 0,
             Safeties: isSafety ? 1 : 0,
             Interceptions: isInterception ? 1 : 0,
             playMinute

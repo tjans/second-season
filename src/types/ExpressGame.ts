@@ -1,6 +1,3 @@
-import { queryOptions } from "@tanstack/react-query";
-import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
-
 export type ExpressGame = {
     gameId: string;
     homeTeamId: string;
@@ -13,7 +10,6 @@ export type ExpressGameState = {
     homeScore: number;
     awayScore: number;
     currentZone?: number | null;
-    hasIncludedZone8?: boolean;
     minute: number;
     possessionId?: string | null;
     quarter?: 1 | 2 | 3 | 4 | "OT";

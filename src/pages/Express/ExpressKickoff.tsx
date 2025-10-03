@@ -8,7 +8,7 @@ import { useSaveGame } from '@/queries/expressGameQueries';
 import { useNavigate } from 'react-router-dom';
 
 export default function ExpressKickoff() {
-  const {game, offenseTeam, defenseTeam, gameId, gameUrl} = useExpressGameTools();
+  const {game, offenseTeam, defenseTeam, gameUrl} = useExpressGameTools();
   
   const navigate = useNavigate();
   usePageTitle("Express Kickoff");
@@ -17,12 +17,11 @@ export default function ExpressKickoff() {
   const logPlayMutation = useLogPlay();
 
   const handleZoneSelect = (zone: number) => {
- let gameAfterPlay = {...game};
+    let gameAfterPlay = {...game};
 
     let playMinute = game.situation.minute;  // store this so we can add it to the play log
     gameAfterPlay.situation.minute++;
     gameAfterPlay.situation.currentZone = zone;
-    gameAfterPlay.situation.hasIncludedZone8 = false; // used to determine if we log the yards from a play that starts in the 8th zone and goes for a TD
     gameAfterPlay.situation.mode = "DRIVE";
     gameAfterPlay.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
     saveGameMutation.mutate(gameAfterPlay);
@@ -32,7 +31,6 @@ export default function ExpressKickoff() {
       message: `${offenseTeam.abbreviation} kickoff to zone ${zone}`,
       date: new Date().toISOString(),
       gameId: game.gameId,
-      yardsGained: null,
       defenseTeamId: defenseTeam.teamId,
       offenseTeamId: offenseTeam.teamId,
       logId: crypto.randomUUID(),

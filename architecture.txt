@@ -6,49 +6,33 @@ Stats Screen (general)
 Stats Screen (calculated)
 Styling/Game day
 Dark mode
-
-expressGames (gameId, leagueId):
-    gameId
-    homeTeamId
-    awayTeamId,
-    leagueId: null for now
-
-    gameState: {
-        homeScore
-        awayScore,
-        currentZone,
-        segment,
-        possessionId
-        quarter
-    }
-
-teams (teamId):
-    teamId,
-    city,
-    mascot,
-    stadium,
-    finders {each finder is an object, min, max, playerId}:
-        {
-            rushingIn: [finder1, finder2...]
-            rushingOut: [finder1, finder2...]
-            shortPass: [finder1, finder2...]
-            mediumPass: [finder1, finder2...]
-            longPass: [finder1, finder2...]
-        }
-
-players (playerId, position):
-    playerId,
-    firstName,
-    lastName,
-    position,
-    teamId
+Team cannot gain zero offensive yards in a quarter - assign 50 if zero
+Extract ExpressPunt/ExpressPass "zone landing" dropdown to a component
 
 
-stats:
-    statId
-    gameId
-    teamId
-    zones
-    yards (10 or 15)
-    gameState (after play completion)
-    
+
+Rushing/Passing split
+-------------------------------
+Add up total offense from all 4 quarters
+Round to nearest 50 yards, go to chart 1a
+Cross reference total yards with tendency -> runs/pass completions
+
+
+Pass Attempts
+-------------------------------
+Chart 2, cross-reference completions with CMP grade
+
+
+Receptions/Rushing attempts
+-------------------------------
+Roll on finders, or...
+
+Rank top 6 receivers in order of durability grades *, **, etc
+Loop through the list, number of receptions based on *, skipping after they reach their durability rating
+
+
+Individual Rusher/Receiver Yardage
+-------------------------------
+Receiving - Go to chart 3a and multiply total catches by the R grade.  
+Rushing - Go to chart 3b and use highest IN/OU (dagger uses special rating) and multiply number of carries by yards indicated from chart
+
