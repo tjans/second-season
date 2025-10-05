@@ -1,13 +1,38 @@
-Punt
-Fumble (on kickoff as well)
+Fumble with advance (on kickoff as well)
+Refactor "move ball" and take in options object instead of separate parameters
+
+Clock/quarter
+-----------------------------------------
+Team cannot gain zero offensive yards in a quarter - assign 50 if zero
 Check for end of quarter/half/etc after adjusting clock
+
+
 Playcalling
-Stats Screen (general)
-Stats Screen (calculated)
+-----------------------------------------
+1-2 Pass, 3-4 Run, 5 TEND, 6 AUDIBLE
+Use Goal Line from zone 1 going in or in "RED ZONE" opportunities in 4th quarter
+Offensive Backfield = QB, SB, FB
+Mobile QB can change pass vs. pass to a run vs. pass twice per game
+
+
+Misc. Stuff
+-----------------------------------------
+Extract ExpressPunt/ExpressPass "zone landing" dropdown to a component
 Styling/Game day
 Dark mode
-Team cannot gain zero offensive yards in a quarter - assign 50 if zero
-Extract ExpressPunt/ExpressPass "zone landing" dropdown to a component
+Stats Screen (general)
+Stats Screen (calculated)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

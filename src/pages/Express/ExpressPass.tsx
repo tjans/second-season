@@ -8,9 +8,15 @@ import { useState } from 'react';
 import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
 import { SelectInput } from '@/components/Elements/SelectInput';
+import ToggleButton from '@/components/Elements/ToggleButton';
 
 export default function ExpressPass() {
-  const {offenseTeam, defenseTeam, gameUrl, moveBall, game, saveGameMutation, logPlayMutation, gameId, situation} = useExpressGameTools();
+  const {
+          offenseTeam, defenseTeam, 
+          gameUrl, moveBall, 
+          game, saveGameMutation, logPlayMutation, gameId, situation, 
+          isFumble, setIsFumble} = useExpressGameTools();
+
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>(null);
   
   const navigate = useNavigate();
@@ -19,6 +25,7 @@ export default function ExpressPass() {
   const {
       register,
       handleSubmit,
+      setValue,
       formState: { errors },
     } = useForm<FormData>();
 
@@ -30,6 +37,8 @@ export default function ExpressPass() {
 
   type FormData = {
     zones: string;
+    isFumble: boolean;
+    fumbleReturnZones: string;
   }
   type IntFormData = {
     interceptionZone: string;
@@ -64,9 +73,15 @@ export default function ExpressPass() {
     navigate(gameUrl());
   }
 
+  // Handle fumbles
   const onSubmit = (data: FormData) => {
-    moveBall(Number(data.zones), "pass", true); // I don't think the clock stops, each play takes a minute regardless.    
-    navigate(gameUrl());
+    const usesTime = true;
+    const isFumble = data.isFumble;
+    const setZone = false;
+    
+    console.log("Form data:", data);
+    //moveBall(Number(data.zones), "pass", usesTime, setZone, isFumble); // I don't think the clock stops, each play takes a minute regardless.    
+    //navigate(gameUrl());
   } 
 
   const onIntSubmit = (data: IntFormData) => {
@@ -108,6 +123,31 @@ export default function ExpressPass() {
                         }}
                     />                    
 
+                    <ToggleButton
+                      className="mt-4"
+                      label="Fumble!"
+                      name="isFumble"
+                      register={register}
+                      onChange={() => {
+                        var newIsFumble = !isFumble;
+                        setIsFumble(newIsFumble);
+                        if(!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
+                      }}
+                    />
+
+                    {isFumble && 
+                      <TextInput
+                        label="How many zones was the fumble returned?"
+                        name="fumbleReturnZones"
+                        register={register}
+                        error={errors.fumbleReturnZones}
+                        type="number"
+                        required
+                        rules={{
+                          required: "Fumble return zones is required"
+                        }}
+                    />            
+                    }
 
                     <div className="flex justify-center mt-4 gap-2 mb-4">
                       <Button type="submit" color="info">Confirm CMP</Button>

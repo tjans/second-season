@@ -1,9 +1,11 @@
 import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
 import { useLogPlay } from "@/queries/playLogQueries";
 import { useTeam } from "@/queries/teamQueries";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 const useExpressGameTools = () => {
+    const [isFumble, setIsFumble] = useState(false)
     const { gameId } = useParams<{ gameId: string }>();
       if (!gameId) throw new Error("gameId is required");
     
@@ -21,7 +23,14 @@ const useExpressGameTools = () => {
       const gameUrl = (url:string = "") => `/express/game/${gameId}/${url}`;
 
       /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
-      const moveBall = async (zones: number, type: "pass" | "sack" | "interception" | "run" | "punt", usesTime: boolean, setZone: boolean = false) : Promise<void> => {
+      const moveBall = async (
+            zones: number, 
+            type: "pass" | "sack" | "interception" | "run" | "punt", 
+            usesTime: boolean, 
+            setZone: boolean = false, 
+            isFumble: boolean = false
+        ) : Promise<void> => {
+
         const currentZone = game.data.situation.currentZone ?? 0;
         let gameAfterPlay = {...game};
         let playMinute = game.data.situation.minute; // store this for the log to indicate what time the play happened
@@ -122,25 +131,28 @@ const useExpressGameTools = () => {
         let yardsGained = 0;
 
         // Basically gain/loss of yards is tracked on normal drives, not interceptions or punts.
-        let isDriveGainLoss = type !== "interception" && !isPunt;
+        
+        if(!isFumble) {
+            let isDriveGainLoss = type !== "interception" && !isPunt;
 
-        if(zones > 0 && isDriveGainLoss) { // moving forward and not an interception
-            for(let z = currentZone; z < newZone; z++) {
-                if(z === 1 || z === 2 || z === 7 || z === 8) {
-                    yardsGained += 10;
-                } else {
-                    yardsGained += 15;
-                }
-            }
-        } else if(zones < 0 && isDriveGainLoss) { // moving backwards and not an interception
-            if(type === "sack") {
-                yardsGained = 7 * delta; // sacks are a flat 7 yards per zone lost
-            } else {
-                for(let z = currentZone; z > newZone; z--) {
-                    if(z === 8 || z === 7 || z === 2 || z === 1) {
-                        yardsGained -= 10;
+            if(zones > 0 && isDriveGainLoss) { // moving forward and not an interception
+                for(let z = currentZone; z < newZone; z++) {
+                    if(z === 1 || z === 2 || z === 7 || z === 8) {
+                        yardsGained += 10;
                     } else {
-                        yardsGained -= 15;
+                        yardsGained += 15;
+                    }
+                }
+            } else if(zones < 0 && isDriveGainLoss) { // moving backwards and not an interception
+                if(type === "sack") {
+                    yardsGained = 7 * delta; // sacks are a flat 7 yards per zone lost
+                } else {
+                    for(let z = currentZone; z > newZone; z--) {
+                        if(z === 8 || z === 7 || z === 2 || z === 1) {
+                            yardsGained -= 10;
+                        } else {
+                            yardsGained -= 15;
+                        }
                     }
                 }
             }
@@ -148,6 +160,8 @@ const useExpressGameTools = () => {
 
         // MESSAGE BUILDER - create the message for the play log based on what happened in the play
         // At this point, newZone is the "pre-flipped" zone, situation.currentZone is the flipped zone if there was a possession change.
+
+        // HANDLE FUMBLES 
         let message = "UNKNOWN PLAY TYPE";
         switch(type) {
             case "pass":
@@ -238,7 +252,8 @@ const useExpressGameTools = () => {
         defenseTeam,
         saveGameMutation,
         logPlayMutation,
-        undoMutation
+        undoMutation,
+        isFumble,setIsFumble
     };
 }
 
