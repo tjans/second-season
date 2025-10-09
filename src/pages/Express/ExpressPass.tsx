@@ -9,31 +9,32 @@ import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
 import { SelectInput } from '@/components/Elements/SelectInput';
 import ToggleButton from '@/components/Elements/ToggleButton';
+import es from '@/services/expressService';
 
 export default function ExpressPass() {
   const {
-          offenseTeam, defenseTeam, 
-          gameUrl, moveBall, 
-          game, saveGameMutation, logPlayMutation, gameId, situation, 
-          isFumble, setIsFumble} = useExpressGameTools();
+    offenseTeam, defenseTeam,
+    gameUrl,
+    game, saveGameMutation, logPlayMutation, gameId, situation,
+    isFumble, setIsFumble } = useExpressGameTools();
 
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>(null);
-  
+
   const navigate = useNavigate();
   usePageTitle("Express Pass");
 
   const {
-      register,
-      handleSubmit,
-      setValue,
-      formState: { errors },
-    } = useForm<FormData>();
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>();
 
-    const {
-      register: intRegister,
-      handleSubmit: handleIntSubmit,
-      formState: { errors: intErrors },
-    } = useForm<IntFormData>();
+  const {
+    register: intRegister,
+    handleSubmit: handleIntSubmit,
+    formState: { errors: intErrors },
+  } = useForm<IntFormData>();
 
   type FormData = {
     zones: string;
@@ -45,7 +46,7 @@ export default function ExpressPass() {
   }
 
   const handleIncomplete = () => {
-    let gameAfterPlay = {...game};
+    let gameAfterPlay = structuredClone(game);
     let playMinute = game.situation.minute; // store this for the log to indicate what time the play happened
 
     // increase clock
@@ -53,17 +54,15 @@ export default function ExpressPass() {
     saveGameMutation.mutate(gameAfterPlay);
 
     // log the play
-    logPlayMutation.mutate({      
-            situation: gameAfterPlay.situation,
-            message: `${offenseTeam?.abbreviation} throws incomplete pass`,
-            date: new Date().toISOString(),
-            gameId: gameId,
-            offenseTeamId: offenseTeam.teamId,
-            defenseTeamId: defenseTeam.teamId,
-            logId: crypto.randomUUID(),
-            TD: 0,
-            playMinute
-        });
+    logPlayMutation.mutate({
+      situation: gameAfterPlay.situation,
+      message: `${offenseTeam?.abbreviation} throws incomplete pass`,
+      gameId: gameId,
+      offenseTeamId: offenseTeam.teamId,
+      defenseTeamId: defenseTeam.teamId,
+      playMinute,
+      TD: 0,
+    });
 
     navigate(gameUrl());
   }
@@ -75,22 +74,60 @@ export default function ExpressPass() {
 
   // Handle fumbles
   const onSubmit = (data: FormData) => {
-    const usesTime = true;
-    const isFumble = data.isFumble;
-    const setZone = false;
-    
-    console.log("Form data:", data);
-    //moveBall(Number(data.zones), "pass", usesTime, setZone, isFumble); // I don't think the clock stops, each play takes a minute regardless.    
-    //navigate(gameUrl());
-  } 
+    let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+    let zoneDelta = Number(data.zones);
+
+    // Safety checks
+    if (!game.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
+
+    let gameAfterPlay = structuredClone(game);  // for saving to the data store after manipulating the play   
+
+    es.setNewZone(gameAfterPlay, zoneDelta, false);
+
+    let scoreResult = es.checkForScore(gameAfterPlay, offenseTeam.teamId, true);
+
+    // Advance the clock
+    es.advanceClock(gameAfterPlay);
+
+    let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
+
+    // Build the message
+    let message = "UNKNOWN PASS PLAY";
+    message = `${offenseTeam?.abbreviation} pass sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
+    if (scoreResult.isTouchdown) message += `, TD!`;
+    if (scoreResult.isSafety) message += `, SAFETY!`;
+
+    // Tally the yardage gained
+    let rushYardsGained = 0;
+    let passYardsGained = es.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
+
+    // Persist the game
+    saveGameMutation.mutate(gameAfterPlay);
+
+    // Log the play for undo as well as historical purposes
+    logPlayMutation.mutate({
+      gameId: gameId,
+      situation: gameAfterPlay.situation,
+      message,
+
+      passYardsGained: passYardsGained,
+      rushYardsGained: rushYardsGained,
+      offenseTeamId: offenseTeam.teamId,
+      defenseTeamId: defenseTeam.teamId,
+      TD: scoreResult.isTouchdown ? 1 : 0,
+      playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+    });
+
+    navigate(gameUrl());
+  }
 
   const onIntSubmit = (data: IntFormData) => {
-    let usesTime = true;
-    let setZone = true;
-    moveBall(Number(data.interceptionZone), "interception", usesTime, setZone);
-    navigate(gameUrl());
-  } 
-  
+    // let usesTime = true;
+    // let setZone = true;
+    // moveBall(Number(data.interceptionZone), "interception", usesTime, setZone);
+    // navigate(gameUrl());
+  }
+
   return (
     <>
       <ContentWrapper>
@@ -102,73 +139,73 @@ export default function ExpressPass() {
         <div className="text-center mt-2">
 
           <div className="flex justify-center mt-4 gap-2 mb-4">
-            <Button onClick={() => setResult("CMP")} variant={result=="CMP" ? "filled" : "outlined"} className="w-24">CMP</Button>
-            <Button onClick={() => setResult("INC")} variant={result=="INC" ? "filled" : "outlined"} className="w-24">INC</Button>
-            <Button onClick={() => setResult("INT")} variant={result=="INT" ? "filled" : "outlined"} className="w-24">INT</Button>
-            <Button onClick={() => setResult("SACK")} variant={result=="SACK" ? "filled" : "outlined"} className="w-24">SACK</Button>
+            <Button onClick={() => setResult("CMP")} variant={result == "CMP" ? "filled" : "outlined"} className="w-24">CMP</Button>
+            <Button onClick={() => setResult("INC")} variant={result == "INC" ? "filled" : "outlined"} className="w-24">INC</Button>
+            <Button onClick={() => setResult("INT")} variant={result == "INT" ? "filled" : "outlined"} className="w-24">INT</Button>
+            <Button onClick={() => setResult("SACK")} variant={result == "SACK" ? "filled" : "outlined"} className="w-24">SACK</Button>
           </div>
-          
+
           {result == "CMP" && <>
             <section>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <TextInput
-                        label="How many zones did the pass sequence gain?"
-                        name="zones"
-                        register={register}
-                        error={errors.zones}
-                        type="number"
-                        required
-                        rules={{
-                          required: "Zones is required"
-                        }}
-                    />                    
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <TextInput
+                  label="How many zones did the pass sequence gain?"
+                  name="zones"
+                  register={register}
+                  error={errors.zones}
+                  type="number"
+                  required
+                  rules={{
+                    required: "Zones is required"
+                  }}
+                />
 
-                    <ToggleButton
-                      className="mt-4"
-                      label="Fumble!"
-                      name="isFumble"
-                      register={register}
-                      onChange={() => {
-                        var newIsFumble = !isFumble;
-                        setIsFumble(newIsFumble);
-                        if(!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
-                      }}
-                    />
+                <ToggleButton
+                  className="mt-4"
+                  label="Fumble!"
+                  name="isFumble"
+                  register={register}
+                  onChange={() => {
+                    var newIsFumble = !isFumble;
+                    setIsFumble(newIsFumble);
+                    if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
+                  }}
+                />
 
-                    {isFumble && 
-                      <TextInput
-                        label="How many zones was the fumble returned?"
-                        name="fumbleReturnZones"
-                        register={register}
-                        error={errors.fumbleReturnZones}
-                        type="number"
-                        required
-                        rules={{
-                          required: "Fumble return zones is required"
-                        }}
-                    />            
-                    }
+                {isFumble &&
+                  <TextInput
+                    label="How many zones was the fumble returned?"
+                    name="fumbleReturnZones"
+                    register={register}
+                    error={errors.fumbleReturnZones}
+                    type="number"
+                    required
+                    rules={{
+                      required: "Fumble return zones is required"
+                    }}
+                  />
+                }
 
-                    <div className="flex justify-center mt-4 gap-2 mb-4">
-                      <Button type="submit" color="info">Confirm CMP</Button>
-                      <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
-                    </div>
-                </form>
+                <div className="flex justify-center mt-4 gap-2 mb-4">
+                  <Button type="submit" color="info">Confirm CMP</Button>
+                  <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                </div>
+              </form>
             </section>
           </>}
 
-          {result == "INC" && 
+          {result == "INC" &&
             <div className="flex justify-center mt-4 gap-2 mb-4">
               <Button onClick={handleIncomplete} color="info">Confirm INC</Button>
               <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
             </div>
           }
 
-          {result == "INT" && 
+          {result == "INT" &&
             <>
-            <section>
+              <section>
                 <form onSubmit={handleIntSubmit(onIntSubmit)}>
-                   <SelectInput
+                  <SelectInput
                     label="Which zone did the interception (and return) end in?"
                     name="interceptionZone"
                     register={intRegister}
@@ -192,25 +229,25 @@ export default function ExpressPass() {
                     }}
                   />
                   <div className="flex justify-center mt-4 gap-2 mb-4">
-                      <Button type="submit" color="info">Confirm INT</Button>
-                      <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
-                    </div>
+                    <Button type="submit" color="info">Confirm INT</Button>
+                    <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                  </div>
                 </form>
-            </section>
-            </>          }
+              </section>
+            </>}
 
-          {result == "SACK" && 
+          {result == "SACK" &&
             <div className="flex gap-2 justify-center">
               <Button onClick={() => handleSack(false)} color="info">Same zone</Button>
               <Button onClick={() => handleSack(true)} color="info">1-zone Loss</Button>
               <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
             </div>
           }
-          
+
         </div>
-        
+
         <div className="text-center">
-          
+
         </div>
       </ContentWrapper>
     </>

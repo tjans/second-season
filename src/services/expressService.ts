@@ -1,30 +1,75 @@
-import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
-import { useLogPlay } from "@/queries/playLogQueries";
-import { useTeam } from "@/queries/teamQueries";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { ExpressGame } from "@/types/ExpressGame";
 
-const useExpressGameTools = () => {
-    const [isFumble, setIsFumble] = useState(false)
-    const { gameId } = useParams<{ gameId: string }>();
-    if (!gameId) throw new Error("gameId is required");
 
-    const game = useExpressGame(gameId, { staleTime: Infinity });
-    if (!game.data) throw new Error("game data is required");
+export default {
 
-    const homeTeam = useTeam(game.data?.homeTeamId || "", { staleTime: Infinity });
-    const awayTeam = useTeam(game.data?.awayTeamId || "", { staleTime: Infinity });
-    const saveGameMutation = useSaveGame();
-    const logPlayMutation = useLogPlay();
-    const undoMutation = useUndo();
+    calculateYardage: (startZone: number, delta: number) => {
+        let newZone = startZone + delta;
+        let yardsGained = 0;
+        let modifier = delta < 0 ? -1 : 1; // determine if we're moving forward or backward
 
-    const offenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? homeTeam.data : awayTeam.data;
-    const defenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? awayTeam.data : homeTeam.data;
-    const gameUrl = (url: string = "") => `/express/game/${gameId}/${url}`;
+        for (let z = Math.min(startZone, newZone); z < Math.max(startZone, newZone); z++) {
+            const zoneYards = (z === 1 || z === 2 || z === 7 || z === 8) ? 10 : 15;
+            yardsGained += modifier * zoneYards;
+        }
+        return yardsGained;
+    },
 
-    type PlayTypes = "pass" | "sack" | "interception" | "run" | "punt";
 
-    /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
+    setNewZone: (gameAfterPlay: ExpressGame, zones: number, placeBall: boolean) => {
+        if (!gameAfterPlay) throw new Error("Game is required");
+
+        if (gameAfterPlay.situation.currentZone == null) throw new Error("You cannot move the ball when the currentZone is not set");
+
+        let newZone = zones + gameAfterPlay.situation.currentZone;
+
+        if (placeBall) {
+            // placing the ball, so use zones as the new zone directly
+            newZone = zones > 0
+                ? Math.min(9, zones)
+                : Math.max(0, zones);
+        } else {
+            // moving the ball relative to current zone
+            newZone = zones > 0
+                ? Math.min(9, newZone)
+                : Math.max(0, newZone);
+        }
+
+        gameAfterPlay.situation.currentZone = newZone;
+
+        return gameAfterPlay;
+    },
+
+    advanceClock: (gameAfterPlay: ExpressGame) => {
+        return gameAfterPlay.situation.minute++;
+    },
+
+    checkForScore: (gameAfterPlay: ExpressGame, offenseTeamId: string, isOffense: boolean = true) => {
+        let TDzone = isOffense ? 9 : 0;
+        let safetyZone = isOffense ? 0 : 9;
+
+        let isTouchdown = gameAfterPlay.situation.currentZone == TDzone;
+        let isSafety = gameAfterPlay.situation.currentZone == safetyZone;
+
+        if (isTouchdown) {
+            gameAfterPlay.situation.mode = "PAT";
+
+            if (offenseTeamId == gameAfterPlay.homeTeamId) {
+                gameAfterPlay.situation.homeScore += 6;
+            } else {
+                gameAfterPlay.situation.awayScore += 6;
+            }
+        }
+
+        return { isTouchdown, isSafety };
+    }
+
+};
+
+
+/*
+
+  /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
     const moveBall = async (
         zones: number,
         type: PlayTypes,
@@ -97,7 +142,7 @@ const useExpressGameTools = () => {
             }
         }
 
-        /*
+        
             if minute > 15 and Q1/Q3, set to minute 1 and Q2/Q4
             if minute > 15 and Q2
                 set to minute 1 and Q3
@@ -106,7 +151,7 @@ const useExpressGameTools = () => {
             if minute > 15 and Q4
                 set to minute 1 and OT
                 new coin toss
-        */
+        
 
         // Check for POSSESSION CHANGE - interceptions and punts
         if (type === "interception" || isPunt) {
@@ -226,38 +271,4 @@ const useExpressGameTools = () => {
         });
     }
 
-    // Clock display formatter
-    const clockDisplay = (minute: number) => minute.toString() + ":00";
-    const yardDisplay = (zone: number) => {
-        if (zone == 0) return "SAFETY";
-        if (zone === 9) return "TD";
-        return zone;
-    }
-
-    const getReverseZone = (zone: number): number => {
-        return (9 - zone);
-    }
-
-    return {
-        gameUrl,
-        moveBall,
-        clockDisplay,
-        yardDisplay,
-        getReverseZone,
-
-        gameTools: game,
-        game: game.data,
-        situation: game.data.situation,
-        gameId: game.data.gameId,
-        homeTeam: homeTeam.data,
-        awayTeam: awayTeam.data,
-        offenseTeam,
-        defenseTeam,
-        saveGameMutation,
-        logPlayMutation,
-        undoMutation,
-        isFumble, setIsFumble
-    };
-}
-
-export default useExpressGameTools;
+*/

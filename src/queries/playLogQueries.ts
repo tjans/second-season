@@ -1,5 +1,5 @@
 import playLogService from "@/services/playLogService";
-import { PlayLog } from "@/types/PlayLog";
+import { MutablePlayLog, PlayLog } from "@/types/PlayLog";
 import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { expressGameKeys } from "./expressGameQueries";
@@ -15,21 +15,28 @@ export const playLogKeys = {
 
 //#region Queries
 export const usePlayLogs = (gameId: string, options?: SafeQueryOptionsFor<PlayLog[]>) =>
-  useSuspenseQuery({
-    queryKey: playLogKeys.game(gameId),
-    queryFn: () => playLogService.getLogs(gameId),
-    ...options
-  }) 
+    useSuspenseQuery({
+        queryKey: playLogKeys.game(gameId),
+        queryFn: () => playLogService.getLogs(gameId),
+        ...options
+    })
 
 // #endregion
-    
+
 
 // #region Mutations
 export const useLogPlay = () => {
     const queryClient = useQueryClient(); // Use the existing query client from context
 
     return useMutation({
-        mutationFn: async (log: PlayLog) => playLogService.logPlay(log),
+        mutationFn: async (log: MutablePlayLog) => {
+            let fullLog = {
+                ...log,
+                logId: crypto.randomUUID(),
+                date: new Date().toISOString()
+            } as PlayLog;
+            playLogService.logPlay(fullLog)
+        },
         onSuccess: (_data, variables) => {
             // Invalidate all queries that start with [playLog]
             queryClient.invalidateQueries({
