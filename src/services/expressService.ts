@@ -1,9 +1,64 @@
 import { ExpressGame } from "@/types/ExpressGame";
-
+import { Team } from "@/types/Team";
 
 export default {
 
-    calculateYardage: (startZone: number, delta: number) => {
+    processPass: function (game: ExpressGame, zones: number, offenseTeam: Team, defenseTeam: Team) {
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+        let zoneDelta = Number(zones);
+
+        if (!game.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
+
+        let gameAfterPlay = structuredClone(game);  // for saving to the data store after manipulating the play   
+
+        this.setNewZone(gameAfterPlay, zoneDelta, false);
+
+        let scoreResult = this.checkForScore(gameAfterPlay, offenseTeam.teamId, true);
+
+        // Advance the clock
+        this.advanceClock(gameAfterPlay);
+
+        let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
+
+        // Build the message
+        let message = "UNKNOWN PASS PLAY";
+        message = `${offenseTeam?.abbreviation} pass sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
+        if (scoreResult.isTouchdown) message += `, TD!`;
+        if (scoreResult.isSafety) message += `, SAFETY!`;
+
+        // Tally the yardage gained
+        let rushYardsGained = 0;
+        let passYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
+
+        // If it's a safety, we need to swap possession
+        if (scoreResult.isSafety) this.swapPossession(gameAfterPlay, offenseTeam.teamId, defenseTeam.teamId);
+
+        let log = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+
+            passYardsGained: passYardsGained,
+            rushYardsGained: rushYardsGained,
+            offenseTeamId: offenseTeam.teamId,
+            defenseTeamId: defenseTeam.teamId,
+            TD: scoreResult.isTouchdown ? 1 : 0,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        }
+            
+        return {gameAfterPlay, log};
+    },
+
+    swapPossession: function (gameAfterPlay: ExpressGame, awayTeamId: string, homeTeamId: string) {
+        if(gameAfterPlay.situation.possessionId == null) throw new Error("Possession ID is required to swap possession");
+        gameAfterPlay.situation.possessionId = gameAfterPlay.situation.possessionId == homeTeamId ? awayTeamId : homeTeamId;
+    },
+
+    getReverseZone: function (zone: number): number {
+        return (9 - zone);
+    },
+
+    calculateYardage: function (startZone: number, delta: number) {
         let newZone = startZone + delta;
         let yardsGained = 0;
         let modifier = delta < 0 ? -1 : 1; // determine if we're moving forward or backward
@@ -16,7 +71,7 @@ export default {
     },
 
 
-    setNewZone: (gameAfterPlay: ExpressGame, zones: number, placeBall: boolean) => {
+    setNewZone: function (gameAfterPlay: ExpressGame, zones: number, placeBall: boolean) {
         if (!gameAfterPlay) throw new Error("Game is required");
 
         if (gameAfterPlay.situation.currentZone == null) throw new Error("You cannot move the ball when the currentZone is not set");
@@ -40,11 +95,11 @@ export default {
         return gameAfterPlay;
     },
 
-    advanceClock: (gameAfterPlay: ExpressGame) => {
+    advanceClock: function (gameAfterPlay: ExpressGame) {
         return gameAfterPlay.situation.minute++;
     },
 
-    checkForScore: (gameAfterPlay: ExpressGame, offenseTeamId: string, isOffense: boolean = true) => {
+    checkForScore: function (gameAfterPlay: ExpressGame, offenseTeamId: string, isOffense: boolean = true) {
         let TDzone = isOffense ? 9 : 0;
         let safetyZone = isOffense ? 0 : 9;
 
@@ -58,6 +113,14 @@ export default {
                 gameAfterPlay.situation.homeScore += 6;
             } else {
                 gameAfterPlay.situation.awayScore += 6;
+            }
+        } else if (isSafety) {
+            gameAfterPlay.situation.mode = "PAT";
+
+            if (offenseTeamId == gameAfterPlay.homeTeamId) {
+                gameAfterPlay.situation.awayScore += 2;
+            } else {
+                gameAfterPlay.situation.homeScore += 2;
             }
         }
 

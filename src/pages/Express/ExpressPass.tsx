@@ -50,7 +50,7 @@ export default function ExpressPass() {
     let playMinute = game.situation.minute; // store this for the log to indicate what time the play happened
 
     // increase clock
-    gameAfterPlay.situation.minute++;
+    es.advanceClock(gameAfterPlay);
     saveGameMutation.mutate(gameAfterPlay);
 
     // log the play
@@ -60,64 +60,22 @@ export default function ExpressPass() {
       gameId: gameId,
       offenseTeamId: offenseTeam.teamId,
       defenseTeamId: defenseTeam.teamId,
-      playMinute,
-      TD: 0,
+      playMinute
     });
 
     navigate(gameUrl());
   }
 
   const handleSack = (oneZoneLoss: boolean) => {
-    moveBall(oneZoneLoss ? -1 : 0, "sack", true);
-    navigate(gameUrl());
+    // moveBall(oneZoneLoss ? -1 : 0, "sack", true);
+    // navigate(gameUrl());
   }
 
   // Handle fumbles
   const onSubmit = (data: FormData) => {
-    let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
-    let zoneDelta = Number(data.zones);
-
-    // Safety checks
-    if (!game.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
-
-    let gameAfterPlay = structuredClone(game);  // for saving to the data store after manipulating the play   
-
-    es.setNewZone(gameAfterPlay, zoneDelta, false);
-
-    let scoreResult = es.checkForScore(gameAfterPlay, offenseTeam.teamId, true);
-
-    // Advance the clock
-    es.advanceClock(gameAfterPlay);
-
-    let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
-
-    // Build the message
-    let message = "UNKNOWN PASS PLAY";
-    message = `${offenseTeam?.abbreviation} pass sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
-    if (scoreResult.isTouchdown) message += `, TD!`;
-    if (scoreResult.isSafety) message += `, SAFETY!`;
-
-    // Tally the yardage gained
-    let rushYardsGained = 0;
-    let passYardsGained = es.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
-
-    // Persist the game
+    let { gameAfterPlay, log } = es.processPass(game, Number(data.zones), offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
-
-    // Log the play for undo as well as historical purposes
-    logPlayMutation.mutate({
-      gameId: gameId,
-      situation: gameAfterPlay.situation,
-      message,
-
-      passYardsGained: passYardsGained,
-      rushYardsGained: rushYardsGained,
-      offenseTeamId: offenseTeam.teamId,
-      defenseTeamId: defenseTeam.teamId,
-      TD: scoreResult.isTouchdown ? 1 : 0,
-      playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
-    });
-
+    logPlayMutation.mutate(log);
     navigate(gameUrl());
   }
 
