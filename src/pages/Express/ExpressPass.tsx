@@ -67,8 +67,11 @@ export default function ExpressPass() {
   }
 
   const handleSack = (oneZoneLoss: boolean) => {
-    // moveBall(oneZoneLoss ? -1 : 0, "sack", true);
-    // navigate(gameUrl());
+    let zonesLost = oneZoneLoss ? -1 : 0;
+    let { gameAfterPlay, log } = es.processSack(game, zonesLost, offenseTeam, defenseTeam);
+    saveGameMutation.mutate(gameAfterPlay);
+    logPlayMutation.mutate(log);
+    navigate(gameUrl());
   }
 
   // Handle fumbles
@@ -80,10 +83,10 @@ export default function ExpressPass() {
   }
 
   const onIntSubmit = (data: IntFormData) => {
-    // let usesTime = true;
-    // let setZone = true;
-    // moveBall(Number(data.interceptionZone), "interception", usesTime, setZone);
-    // navigate(gameUrl());
+    let { gameAfterPlay, log } = es.processInterception(game, Number(data.interceptionZone), offenseTeam, defenseTeam);
+    saveGameMutation.mutate(gameAfterPlay);
+    logPlayMutation.mutate(log);
+    navigate(gameUrl());
   }
 
   return (
@@ -102,6 +105,8 @@ export default function ExpressPass() {
             <Button onClick={() => setResult("INT")} variant={result == "INT" ? "filled" : "outlined"} className="w-24">INT</Button>
             <Button onClick={() => setResult("SACK")} variant={result == "SACK" ? "filled" : "outlined"} className="w-24">SACK</Button>
           </div>
+
+          {!result && <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>}
 
           {result == "CMP" && <>
             <section>
