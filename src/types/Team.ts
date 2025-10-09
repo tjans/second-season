@@ -1,6 +1,3 @@
-import { queryOptions } from "@tanstack/react-query";
-import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
-
 export type Team = {
     teamId: string;
     city: string;

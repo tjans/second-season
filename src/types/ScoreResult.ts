@@ -1,0 +1,1 @@
+export type ScoreResult = "TOUCHDOWN" | "SAFETY" | null;

@@ -1,8 +1,12 @@
 import { ExpressGame } from "@/types/ExpressGame";
+import { ScoreResult } from "@/types/ScoreResult";
 import { Team } from "@/types/Team";
 
 export default {
 
+    /**************************************************************************************************************************
+    * Main functions to process plays
+    **************************************************************************************************************************/
     processPass: function (game: ExpressGame, zones: number, offenseTeam: Team, defenseTeam: Team) {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let zoneDelta = Number(zones);
@@ -13,25 +17,27 @@ export default {
 
         this.setNewZone(gameAfterPlay, zoneDelta, false);
 
+        // Determines if it's a touchdown or safety
         let scoreResult = this.checkForScore(gameAfterPlay, offenseTeam.teamId, true);
+        let isTouchdown = scoreResult === "TOUCHDOWN";
+        let isSafety = scoreResult === "SAFETY";
 
         // Advance the clock
         this.advanceClock(gameAfterPlay);
 
+        // Tally the yardage gained
         let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
+        let rushYardsGained = 0;
+        let passYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
 
         // Build the message
         let message = "UNKNOWN PASS PLAY";
         message = `${offenseTeam?.abbreviation} pass sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
-        if (scoreResult.isTouchdown) message += `, TD!`;
-        if (scoreResult.isSafety) message += `, SAFETY!`;
-
-        // Tally the yardage gained
-        let rushYardsGained = 0;
-        let passYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
+        if (isTouchdown) message += `, TD!`;
+        if (isSafety) message += `, SAFETY!`;
 
         // If it's a safety, we need to swap possession
-        if (scoreResult.isSafety) this.swapPossession(gameAfterPlay, offenseTeam.teamId, defenseTeam.teamId);
+        if (isSafety) this.swapPossession(gameAfterPlay, offenseTeam.teamId, defenseTeam.teamId);
 
         let log = {
             gameId: gameAfterPlay.gameId,
@@ -42,15 +48,19 @@ export default {
             rushYardsGained: rushYardsGained,
             offenseTeamId: offenseTeam.teamId,
             defenseTeamId: defenseTeam.teamId,
-            TD: scoreResult.isTouchdown ? 1 : 0,
+            TD: isTouchdown ? 1 : 0,
+            Safeties: isSafety ? 1 : 0,
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
-            
-        return {gameAfterPlay, log};
+
+        return { gameAfterPlay, log };
     },
 
+    /**************************************************************************************************************************
+    * Helper functions
+    **************************************************************************************************************************/
     swapPossession: function (gameAfterPlay: ExpressGame, awayTeamId: string, homeTeamId: string) {
-        if(gameAfterPlay.situation.possessionId == null) throw new Error("Possession ID is required to swap possession");
+        if (gameAfterPlay.situation.possessionId == null) throw new Error("Possession ID is required to swap possession");
         gameAfterPlay.situation.possessionId = gameAfterPlay.situation.possessionId == homeTeamId ? awayTeamId : homeTeamId;
     },
 
@@ -70,7 +80,6 @@ export default {
         return yardsGained;
     },
 
-
     setNewZone: function (gameAfterPlay: ExpressGame, zones: number, placeBall: boolean) {
         if (!gameAfterPlay) throw new Error("Game is required");
 
@@ -78,17 +87,9 @@ export default {
 
         let newZone = zones + gameAfterPlay.situation.currentZone;
 
-        if (placeBall) {
-            // placing the ball, so use zones as the new zone directly
-            newZone = zones > 0
-                ? Math.min(9, zones)
-                : Math.max(0, zones);
-        } else {
-            // moving the ball relative to current zone
-            newZone = zones > 0
-                ? Math.min(9, newZone)
-                : Math.max(0, newZone);
-        }
+        newZone = zones > 0
+            ? Math.min(9, zones)
+            : Math.max(0, zones);
 
         gameAfterPlay.situation.currentZone = newZone;
 
@@ -99,7 +100,7 @@ export default {
         return gameAfterPlay.situation.minute++;
     },
 
-    checkForScore: function (gameAfterPlay: ExpressGame, offenseTeamId: string, isOffense: boolean = true) {
+    checkForScore: function (gameAfterPlay: ExpressGame, offenseTeamId: string, isOffense: boolean = true): ScoreResult {
         let TDzone = isOffense ? 9 : 0;
         let safetyZone = isOffense ? 0 : 9;
 
@@ -124,7 +125,10 @@ export default {
             }
         }
 
-        return { isTouchdown, isSafety };
+        if (isTouchdown) return "TOUCHDOWN";
+        if (isSafety) return "SAFETY";
+
+        return null;
     }
 
 };
