@@ -25,7 +25,7 @@ export default {
         this.setRelativeZone(gameAfterPlay, zoneDelta);
 
         // Determines if it's a touchdown or safety
-        let scoreResult = this.checkForScore(gameAfterPlay, offenseTeam.teamId);
+        let scoreResult = this.checkForScore(gameAfterPlay);
         let isTouchdown = scoreResult === "TOUCHDOWN";
         let isSafety = scoreResult === "SAFETY";
 
@@ -44,7 +44,7 @@ export default {
         if (isSafety) message += `, SAFETY!`;
 
         // If it's a safety, we need to swap possession
-        if (isSafety) this.swapPossession(gameAfterPlay, offenseTeam.teamId, defenseTeam.teamId);
+        if (isSafety) this.swapPossession(gameAfterPlay);
 
         let log = {
             gameId: gameAfterPlay.gameId,
@@ -68,13 +68,13 @@ export default {
         let gameAfterPlay = structuredClone(game);
 
         this.advanceClock(gameAfterPlay);
-        this.swapPossession(gameAfterPlay, offenseTeam.teamId, defenseTeam.teamId);
+        this.swapPossession(gameAfterPlay);
 
         // play is going the other way now
         let reversedZone = this.getReverseZone(finalZone);
         this.setNewZone(gameAfterPlay, reversedZone);
 
-        let scoreResult = this.checkForScore(gameAfterPlay, defenseTeam.teamId);
+        let scoreResult = this.checkForScore(gameAfterPlay);
         let isTouchdown = scoreResult === "TOUCHDOWN";
 
         // Build the message
@@ -105,7 +105,7 @@ export default {
         this.advanceClock(gameAfterPlay);
         this.setRelativeZone(gameAfterPlay, zonesLost);
 
-        let scoreResult = this.checkForScore(gameAfterPlay, offenseTeam.teamId); // sacks can't score, but we need to check for safeties
+        let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
         let isSafety = scoreResult === "SAFETY";
 
         let message = `${offenseTeam?.abbreviation} is sacked`;
@@ -116,7 +116,7 @@ export default {
             message += `, same zone.`;
         }
 
-        let log = {
+        let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
             situation: gameAfterPlay.situation,
             message,
@@ -131,12 +131,44 @@ export default {
         return { gameAfterPlay, log };
     },
 
+    processKickoff: function (game: ExpressGame, finalZone: number, homeTeamBeforePlay: Team, awayTeamBeforePlay: Team): ProcessPlayResult {
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+        let gameAfterPlay = structuredClone(game);
+
+        gameAfterPlay.situation.mode = "DRIVE";
+        this.advanceClock(gameAfterPlay);
+        this.setNewZone(gameAfterPlay, finalZone);
+        this.swapPossession(gameAfterPlay);
+
+        let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
+        let isTouchdown = scoreResult === "TOUCHDOWN";
+
+        // Build the message
+        let message = `${homeTeamBeforePlay?.abbreviation} kickoff to zone ${finalZone}`;
+        if (isTouchdown) message += `, returned for TD!`;
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+            offenseTeamId: awayTeamBeforePlay.teamId,
+            defenseTeamId: homeTeamBeforePlay.teamId,
+            TD: isTouchdown ? 1 : 0,
+            scoringTeamId: isTouchdown ? awayTeamBeforePlay.teamId : undefined,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        };
+
+        return { gameAfterPlay, log };
+    },
+
     /**************************************************************************************************************************
     * Helper functions
     **************************************************************************************************************************/
-    swapPossession: function (gameAfterPlay: ExpressGame, awayTeamId: string, homeTeamId: string) {
+    swapPossession: function (gameAfterPlay: ExpressGame) {
         if (gameAfterPlay.situation.possessionId == null) throw new Error("Possession ID is required to swap possession");
-        gameAfterPlay.situation.possessionId = gameAfterPlay.situation.possessionId == homeTeamId ? awayTeamId : homeTeamId;
+        gameAfterPlay.situation.possessionId = gameAfterPlay.situation.possessionId == gameAfterPlay.homeTeamId
+            ? gameAfterPlay.awayTeamId
+            : gameAfterPlay.homeTeamId;
     },
 
     getReverseZone: function (zone: number): number {
@@ -187,7 +219,7 @@ export default {
         return gameAfterPlay.situation.minute++;
     },
 
-    checkForScore: function (gameAfterPlay: ExpressGame, offenseTeamId: string): ScoreResult {
+    checkForScore: function (gameAfterPlay: ExpressGame): ScoreResult {
         const TDzone = 9;
         const safetyZone = 0;
 
@@ -197,7 +229,7 @@ export default {
         if (isTouchdown) {
             gameAfterPlay.situation.mode = "PAT";
 
-            if (offenseTeamId == gameAfterPlay.homeTeamId) {
+            if (gameAfterPlay.situation.possessionId == gameAfterPlay.homeTeamId) {
                 gameAfterPlay.situation.homeScore += 6;
             } else {
                 gameAfterPlay.situation.awayScore += 6;
@@ -205,7 +237,7 @@ export default {
         } else if (isSafety) {
             gameAfterPlay.situation.mode = "KICKOFF";
 
-            if (offenseTeamId == gameAfterPlay.homeTeamId) {
+            if (gameAfterPlay.situation.possessionId == gameAfterPlay.homeTeamId) {
                 gameAfterPlay.situation.awayScore += 2;
             } else {
                 gameAfterPlay.situation.homeScore += 2;

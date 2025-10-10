@@ -6,6 +6,7 @@ import ButtonLink from '@/components/Elements/ButtonLink';
 import { useLogPlay } from '@/queries/playLogQueries';
 import { useSaveGame } from '@/queries/expressGameQueries';
 import { useNavigate } from 'react-router-dom';
+import es from '@/services/expressService';
 
 export default function ExpressKickoff() {
   const { game, offenseTeam, defenseTeam, gameUrl } = useExpressGameTools();
@@ -17,27 +18,10 @@ export default function ExpressKickoff() {
   const logPlayMutation = useLogPlay();
 
   const handleZoneSelect = (zone: number) => {
-    // let gameAfterPlay = {...game};
-
-    // let playMinute = game.situation.minute;  // store this so we can add it to the play log
-    // gameAfterPlay.situation.minute++;
-    // gameAfterPlay.situation.currentZone = zone;
-    // gameAfterPlay.situation.mode = "DRIVE";
-    // gameAfterPlay.situation.possessionId = defenseTeam.teamId; // switch possession to defense team
-    // saveGameMutation.mutate(gameAfterPlay);
-
-    // logPlayMutation.mutate({      
-    //   situation: game.situation,
-    //   message: `${offenseTeam.abbreviation} kickoff to zone ${zone}`,
-    //   date: new Date().toISOString(),
-    //   gameId: game.gameId,
-    //   defenseTeamId: defenseTeam.teamId,
-    //   offenseTeamId: offenseTeam.teamId,
-    //   logId: crypto.randomUUID(),
-    //   playMinute
-    // });
-
-    // navigate(gameUrl());
+    let { gameAfterPlay, log } = es.processKickoff(game, zone, offenseTeam, defenseTeam);
+    saveGameMutation.mutate(gameAfterPlay);
+    logPlayMutation.mutate(log);
+    navigate(gameUrl());
   }
 
   const handleFumble = () => {
