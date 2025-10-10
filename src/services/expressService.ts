@@ -330,6 +330,39 @@ export default {
         return { gameAfterPlay, log };
     },
 
+    processPunt: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+        let gameAfterPlay = structuredClone(game);
+
+        gameAfterPlay.situation.mode = "DRIVE";
+        this.advanceClock(gameAfterPlay);
+        this.setNewZone(gameAfterPlay, this.getReverseZone(finalZone));
+        this.swapPossession(gameAfterPlay);
+
+        let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
+        let isTouchdown = scoreResult === "TOUCHDOWN";
+
+        // Build the message
+        let message = `${offenseTeamBeforePlay?.abbreviation} Punts to zone ${finalZone}`;
+        if (isTouchdown) {
+            message += `, returned for TD!`;
+            gameAfterPlay.situation.mode = "PAT";
+        }
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+            offenseTeamId: defenseTeamBeforePlay.teamId,
+            defenseTeamId: offenseTeamBeforePlay.teamId,
+            TD: isTouchdown ? 1 : 0,
+            scoringTeamId: isTouchdown ? defenseTeamBeforePlay.teamId : undefined,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        };
+
+        return { gameAfterPlay, log };
+    },
+
     /**************************************************************************************************************************
     * Helper functions
     **************************************************************************************************************************/
@@ -421,8 +454,12 @@ export default {
 
 };
 
-
 /*
+
+  copy gaf, gb
+  advance clock
+  
+
   /// Helper function to move the ball down the field.  Handles TDs, safeties, and logging yards as you enter new zones.
     const moveBall = async (
         zones: number,
