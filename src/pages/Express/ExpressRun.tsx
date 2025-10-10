@@ -6,28 +6,31 @@ import ButtonLink from '@/components/Elements/ButtonLink';
 import { useNavigate } from 'react-router-dom';
 import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
+import es from '@/services/expressService';
 
 export default function ExpressRun() {
-  const {offenseTeam, gameUrl, moveBall, situation} = useExpressGameTools();
-    
+  const { game, offenseTeam, defenseTeam, gameUrl, saveGameMutation, logPlayMutation, situation } = useExpressGameTools();
+
   const navigate = useNavigate();
   usePageTitle("Express Run");
 
   const {
-      register,
-      handleSubmit,
-      formState: { errors },
-    } = useForm<FormData>();
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>();
 
   type FormData = {
     zones: string;
   }
-  
+
   const onSubmit = (data: FormData) => {
-    moveBall(Number(data.zones), "run", true); // I don't think the clock stops, each play takes a minute regardless.    
+    let { gameAfterPlay, log } = es.processRun(game, Number(data.zones), offenseTeam, defenseTeam);
+    saveGameMutation.mutate(gameAfterPlay);
+    logPlayMutation.mutate(log);
     navigate(gameUrl());
-  } 
-  
+  }
+
   return (
     <>
       <ContentWrapper>
@@ -36,33 +39,33 @@ export default function ExpressRun() {
           <div><span className="font-bold">Current Zone:</span> {situation.currentZone}</div>
         </div>
 
-        <div className="text-center mt-2">                    
+        <div className="text-center mt-2">
 
-            <section>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <TextInput
-                        label="How many zones did the run sequence gain?"
-                        name="zones"
-                        register={register}
-                        error={errors.zones}
-                        type="number"
-                        required
-                        rules={{
-                          required: "Zones is required"
-                        }}
-                    />    
+          <section>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <TextInput
+                label="How many zones did the run sequence gain?"
+                name="zones"
+                register={register}
+                error={errors.zones}
+                type="number"
+                required
+                rules={{
+                  required: "Zones is required"
+                }}
+              />
 
-                    <div className="flex justify-center mt-4 gap-2 mb-4">
-                      <Button type="submit" color="info">Confirm RUN</Button>
-                      <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
-                    </div>                
-                </form>
-            </section>
-                    
+              <div className="flex justify-center mt-4 gap-2 mb-4">
+                <Button type="submit" color="info">Confirm RUN</Button>
+                <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+              </div>
+            </form>
+          </section>
+
         </div>
-        
+
         <div className="text-center">
-          
+
         </div>
       </ContentWrapper>
     </>

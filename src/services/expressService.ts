@@ -46,7 +46,7 @@ export default {
         // If it's a safety, we need to swap possession
         if (isSafety) this.swapPossession(gameAfterPlay);
 
-        let log = {
+        let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
             situation: gameAfterPlay.situation,
             message,
@@ -55,6 +55,58 @@ export default {
             rushYardsGained: rushYardsGained,
             offenseTeamId: offenseTeam.teamId,
             defenseTeamId: defenseTeam.teamId,
+            scoringTeamId: isTouchdown ? offenseTeam.teamId : undefined,
+            TD: isTouchdown ? 1 : 0,
+            Safeties: isSafety ? 1 : 0,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        }
+
+        return { gameAfterPlay, log };
+    },
+
+    processRun: function (game: ExpressGame, zones: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+        let zoneDelta = Number(zones);
+
+        if (!game.situation.currentZone) throw new Error("You cannot move the ball when the currentZone is not set");
+
+        let gameAfterPlay = structuredClone(game);  // for saving to the data store after manipulating the play   
+
+        this.setRelativeZone(gameAfterPlay, zoneDelta);
+
+        // Determines if it's a touchdown or safety
+        let scoreResult = this.checkForScore(gameAfterPlay);
+        let isTouchdown = scoreResult === "TOUCHDOWN";
+        let isSafety = scoreResult === "SAFETY";
+
+        // Advance the clock
+        this.advanceClock(gameAfterPlay);
+
+        // Tally the yardage gained
+        let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
+        let passYardsGained = 0;
+        let rushYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
+
+        // Build the message
+        let message = "UNKNOWN RUN PLAY";
+        message = `${offenseTeam?.abbreviation} run sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
+        if (isTouchdown) message += `, TD!`;
+        if (isSafety) message += `, SAFETY!`;
+
+        // If it's a safety, we need to swap possession
+        if (isSafety) this.swapPossession(gameAfterPlay);
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+
+            passYardsGained: passYardsGained,
+            rushYardsGained: rushYardsGained,
+            offenseTeamId: offenseTeam.teamId,
+            defenseTeamId: defenseTeam.teamId,
+            scoringTeamId: isTouchdown ? offenseTeam.teamId : undefined,
+
             TD: isTouchdown ? 1 : 0,
             Safeties: isSafety ? 1 : 0,
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
@@ -234,6 +286,44 @@ export default {
             message,
             offenseTeamId: offenseTeamBeforePlay.teamId,
             defenseTeamId: defenseTeamBeforePlay.teamId,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        };
+
+        return { gameAfterPlay, log };
+    },
+
+    processFieldGoal: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
+        let gameAfterPlay = structuredClone(game);
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+        if (!gameBeforePlay.situation.currentZone) throw new Error("Current zone is required to process a field goal");
+
+        gameAfterPlay.situation.currentZone = null;
+        gameAfterPlay.situation.mode = "KICKOFF";
+
+        if (isMade) {
+            if (offenseTeamBeforePlay.teamId == gameAfterPlay.homeTeamId) {
+                gameAfterPlay.situation.homeScore += 3;
+            } else {
+                gameAfterPlay.situation.awayScore += 3;
+            }
+        } else {
+
+            // possession changes on a missed FG
+            this.swapPossession(gameAfterPlay);
+
+            // Reverse the field position for the defense, since they take over on downs where the offense left off
+            this.setNewZone(gameAfterPlay, this.getReverseZone(gameBeforePlay.situation.currentZone)); // missed FG possession starts at zone 7
+        }
+
+        let message = `${offenseTeamBeforePlay.abbreviation} FG attempt is ${isMade ? "good!" : "no good!"}`;
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+            offenseTeamId: offenseTeamBeforePlay.teamId,
+            defenseTeamId: defenseTeamBeforePlay.teamId,
+            scoringTeamId: isMade ? offenseTeamBeforePlay.teamId : undefined,
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
