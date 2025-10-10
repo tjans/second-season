@@ -182,6 +182,64 @@ export default {
         return { gameAfterPlay, log };
     },
 
+    processPAT: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
+        let gameAfterPlay = structuredClone(game);
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+
+        gameAfterPlay.situation.currentZone = null;
+        gameAfterPlay.situation.mode = "KICKOFF";
+
+        if (isMade) {
+            if (offenseTeamBeforePlay.teamId == gameAfterPlay.homeTeamId) {
+                gameAfterPlay.situation.homeScore += 1;
+            } else {
+                gameAfterPlay.situation.awayScore += 1;
+            }
+        }
+
+        let message = `${offenseTeamBeforePlay.abbreviation} PAT is ${isMade ? "good!" : "no good!"}`;
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+            offenseTeamId: offenseTeamBeforePlay.teamId,
+            defenseTeamId: defenseTeamBeforePlay.teamId,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        };
+
+        return { gameAfterPlay, log };
+    },
+
+    process2PT: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
+        let gameAfterPlay = structuredClone(game);
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+
+        gameAfterPlay.situation.currentZone = null;
+        gameAfterPlay.situation.mode = "KICKOFF";
+
+        if (isMade) {
+            if (offenseTeamBeforePlay.teamId == gameAfterPlay.homeTeamId) {
+                gameAfterPlay.situation.homeScore += 2;
+            } else {
+                gameAfterPlay.situation.awayScore += 2;
+            }
+        }
+
+        let message = `${offenseTeamBeforePlay.abbreviation} 2-pt try is ${isMade ? "successful!" : "unsuccessful!"}`;
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+            offenseTeamId: offenseTeamBeforePlay.teamId,
+            defenseTeamId: defenseTeamBeforePlay.teamId,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        };
+
+        return { gameAfterPlay, log };
+    },
+
     /**************************************************************************************************************************
     * Helper functions
     **************************************************************************************************************************/

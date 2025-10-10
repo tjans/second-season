@@ -160,7 +160,7 @@ export default function ExpressGame() {
         {game.situation.mode == "PAT" &&
           <div className="mb-4 flex justify-center items-center gap-2">
             <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
-              PAT / 2PT
+              PAT / 2-pt
             </ButtonLink>
           </div>
         }
