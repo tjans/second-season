@@ -46,23 +46,9 @@ export default function ExpressPass() {
   }
 
   const handleIncomplete = () => {
-    let gameAfterPlay = structuredClone(game);
-    let playMinute = game.situation.minute; // store this for the log to indicate what time the play happened
-
-    // increase clock
-    es.advanceClock(gameAfterPlay);
+    let { gameAfterPlay, log } = es.processIncomplete(game, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
-
-    // log the play
-    logPlayMutation.mutate({
-      situation: gameAfterPlay.situation,
-      message: `${offenseTeam?.abbreviation} throws incomplete pass`,
-      gameId: gameId,
-      offenseTeamId: offenseTeam.teamId,
-      defenseTeamId: defenseTeam.teamId,
-      playMinute
-    });
-
+    logPlayMutation.mutate(log);
     navigate(gameUrl());
   }
 

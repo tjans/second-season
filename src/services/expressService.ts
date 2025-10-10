@@ -131,7 +131,7 @@ export default {
         return { gameAfterPlay, log };
     },
 
-    processKickoff: function (game: ExpressGame, finalZone: number, homeTeamBeforePlay: Team, awayTeamBeforePlay: Team): ProcessPlayResult {
+    processKickoff: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let gameAfterPlay = structuredClone(game);
 
@@ -144,17 +144,38 @@ export default {
         let isTouchdown = scoreResult === "TOUCHDOWN";
 
         // Build the message
-        let message = `${homeTeamBeforePlay?.abbreviation} kickoff to zone ${finalZone}`;
+        let message = `${offenseTeamBeforePlay?.abbreviation} kickoff to zone ${finalZone}`;
         if (isTouchdown) message += `, returned for TD!`;
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
             situation: gameAfterPlay.situation,
             message,
-            offenseTeamId: awayTeamBeforePlay.teamId,
-            defenseTeamId: homeTeamBeforePlay.teamId,
+            offenseTeamId: defenseTeamBeforePlay.teamId,
+            defenseTeamId: offenseTeamBeforePlay.teamId,
             TD: isTouchdown ? 1 : 0,
-            scoringTeamId: isTouchdown ? awayTeamBeforePlay.teamId : undefined,
+            scoringTeamId: isTouchdown ? defenseTeamBeforePlay.teamId : undefined,
+            playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+        };
+
+        return { gameAfterPlay, log };
+    },
+
+    processIncomplete: function (game: ExpressGame, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
+        let gameAfterPlay = structuredClone(game);
+        let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+
+        // increase clock
+        this.advanceClock(gameAfterPlay);
+
+        let message = `${offenseTeamBeforePlay?.abbreviation} throws incomplete pass`;
+
+        let log: MutablePlayLog = {
+            gameId: gameAfterPlay.gameId,
+            situation: gameAfterPlay.situation,
+            message,
+            offenseTeamId: offenseTeamBeforePlay.teamId,
+            defenseTeamId: defenseTeamBeforePlay.teamId,
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
