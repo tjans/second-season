@@ -18,7 +18,7 @@ export default function ExpressPass() {
     game, saveGameMutation, logPlayMutation, gameId, situation,
     isFumble, setIsFumble } = useExpressGameTools();
 
-  const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>(null);
+  const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>("CMP");
 
   const navigate = useNavigate();
   usePageTitle("Express Pass");
@@ -53,8 +53,10 @@ export default function ExpressPass() {
   }
 
   const handleSack = (oneZoneLoss: boolean) => {
+    let fumbleReturnZones = 0;
+
     let zonesLost = oneZoneLoss ? -1 : 0;
-    let { gameAfterPlay, log } = es.processSack(game, zonesLost, offenseTeam, defenseTeam);
+    let { gameAfterPlay, log } = es.processSack(game, zonesLost, fumbleReturnZones, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);
     navigate(gameUrl());
@@ -85,7 +87,7 @@ export default function ExpressPass() {
 
         <div className="text-center mt-2">
 
-          <div className="flex justify-center mt-4 gap-2 mb-4">
+          <div className="flex justify-center mt-4 gap-2">
             <Button onClick={() => setResult("CMP")} variant={result == "CMP" ? "filled" : "outlined"} className="w-24">CMP</Button>
             <Button onClick={() => setResult("INC")} variant={result == "INC" ? "filled" : "outlined"} className="w-24">INC</Button>
             <Button onClick={() => setResult("INT")} variant={result == "INT" ? "filled" : "outlined"} className="w-24">INT</Button>
@@ -108,32 +110,6 @@ export default function ExpressPass() {
                     required: "Zones is required"
                   }}
                 />
-
-                <ToggleButton
-                  className="mt-4"
-                  label="Fumble!"
-                  name="isFumble"
-                  register={register}
-                  onChange={() => {
-                    var newIsFumble = !isFumble;
-                    setIsFumble(newIsFumble);
-                    if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
-                  }}
-                />
-
-                {isFumble &&
-                  <TextInput
-                    label="How many zones was the fumble returned?"
-                    name="fumbleReturnZones"
-                    register={register}
-                    error={errors.fumbleReturnZones}
-                    type="number"
-                    required
-                    rules={{
-                      required: "Fumble return zones is required"
-                    }}
-                  />
-                }
 
                 <div className="flex justify-center mt-4 gap-2 mb-4">
                   <Button type="submit" color="info">Confirm CMP</Button>
@@ -186,11 +162,45 @@ export default function ExpressPass() {
             </>}
 
           {result == "SACK" &&
-            <div className="flex gap-2 justify-center">
-              <Button onClick={() => handleSack(false)} color="info">Same zone</Button>
-              <Button onClick={() => handleSack(true)} color="info">1-zone Loss</Button>
-              <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
-            </div>
+
+            <>
+
+              <div className="mb-4 mt-2">
+                <ToggleButton
+                  className="mt-4"
+                  label="Fumble!"
+                  name="isFumble"
+                  register={register}
+                  onChange={() => {
+                    var newIsFumble = !isFumble;
+                    setIsFumble(newIsFumble);
+                    if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
+                  }}
+                />
+
+                {isFumble &&
+                  <TextInput
+                    label="How many zones was the fumble returned?"
+                    name="fumbleReturnZones"
+                    register={register}
+                    error={errors.fumbleReturnZones}
+                    type="number"
+                    required
+                    rules={{
+                      required: "Fumble return zones is required"
+                    }}
+                  />
+                }
+
+              </div>
+
+              <div className="flex gap-2 justify-center">
+                <Button onClick={() => handleSack(false)} color="info">Same zone</Button>
+                <Button onClick={() => handleSack(true)} color="info">1-zone Loss</Button>
+                <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+              </div>
+
+            </>
           }
 
         </div>

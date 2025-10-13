@@ -6,11 +6,11 @@ import { PlayLog } from "./types/PlayLog";
 import { Player } from "./types/Player";
 
 class SecondSeasonManagerDatabase extends Dexie {
-    expressGames!: Table<ExpressGame, string>;
-    teams!: Table<Team, string>;
-    players!: Table<Player, string>;
-    playLogs!: Table<PlayLog, string>; // Add this line for the stats table
-  
+  expressGames!: Table<ExpressGame, string>;
+  teams!: Table<Team, string>;
+  players!: Table<Player, string>;
+  playLogs!: Table<PlayLog, string>; // Add this line for the stats table
+
   constructor() {
     super("second-season");
 
@@ -29,14 +29,14 @@ async function seedIfEmpty() {
   try {
     // Force the database to open by performing a simple operation
     await db.open();
-    
+
     // Check if database already has data
     const existingGames = await db.expressGames.count();
     if (existingGames > 0) {
       console.log("Database already has data, skipping seed");
       return;
     }
-    
+
     const gameId = "game-id-1";
     const homeTeamId = "home-team-id-1";
     const awayTeamId = "away-team-id-1";
@@ -46,7 +46,7 @@ async function seedIfEmpty() {
       homeScore: 0,
       awayScore: 0,
       currentZone: null,
-      minute: 0,
+      minute: 15,
       possessionId: null,
       quarter: 1,
       mode: "PREGAME"
@@ -60,7 +60,7 @@ async function seedIfEmpty() {
       situation: expressGameState,
 
     }
-  
+
     const homePlayers = [
       { playerId: "home-player-QB-1", firstName: "Home", lastName: "QB Player", position: "QB", teamId: homeTeamId },
       { playerId: "home-player-RB-1", firstName: "Home", lastName: "RB Player 1", position: "RB", teamId: homeTeamId },

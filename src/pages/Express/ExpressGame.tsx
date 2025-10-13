@@ -23,7 +23,14 @@ import { PlayLog } from '@/types/PlayLog';
 // This is the main entry point for a game
 export default function ExpressGame() {
 
-  const { game, awayTeam, homeTeam, gameId, gameUrl, saveGameMutation, logPlayMutation, undoMutation, clockDisplay, offenseTeam, defenseTeam } = useExpressGameTools();
+  const {
+    gameId,
+    game,
+    awayTeam, homeTeam, offenseTeam, defenseTeam,
+    saveGameMutation, logPlayMutation, undoMutation,
+    clockDisplay, quarterDisplay, gameUrl
+  } = useExpressGameTools();
+
   const navigate = useNavigate();
   const playLogs = usePlayLogs(gameId);
 
@@ -38,6 +45,7 @@ export default function ExpressGame() {
 
     let playMinute = game.situation.minute;  // store this so we can add it to the play log
     gameAfterPlay.situation.possessionId = kickingTeam.teamId; // kicking team kicks off, receiving team receives
+    gameAfterPlay.coinTossWinnerId = receivingTeamId;
     gameAfterPlay.situation.mode = "KICKOFF";
     saveGameMutation.mutate(gameAfterPlay);
 
@@ -58,6 +66,22 @@ export default function ExpressGame() {
 
     logPlayMutation.mutate(playLog);
     navigate(gameUrl("kickoff"));
+  }
+
+  const handleClockChange = () => {
+    let gameAfterPlay = structuredClone(game);
+
+    gameAfterPlay.situation.minute = Math.max(game.situation.minute - 1, 1);
+
+    saveGameMutation.mutate(gameAfterPlay);
+  }
+
+  const handleQuarterChange = () => {
+    if (!game.situation.quarter) throw new Error("Quarter is not defined");
+
+    let gameAfterPlay = structuredClone(game);
+    gameAfterPlay.situation.quarter = game.situation.quarter == 5 ? 1 : game.situation.quarter + 1;
+    saveGameMutation.mutate(gameAfterPlay);
   }
 
   const handleSwapPossession = () => {
@@ -119,7 +143,7 @@ export default function ExpressGame() {
         <table className="w-full table-fixed">
           <tbody>
             <tr>
-              <td className="px-2 text-center text-2xl">{clockDisplay(game.situation.minute)}</td>
+              <td className="px-2 text-center text-2xl" onClick={handleClockChange}>{clockDisplay(game.situation.minute)}</td>
             </tr>
 
             <tr>
@@ -133,7 +157,7 @@ export default function ExpressGame() {
         <table className="mb-6 w-1/2 table-fixed mx-auto">
           <tbody>
             <tr>
-              <td className="text-center"><span className="font-bold">Quarter:</span> {game.situation.quarter}</td>
+              <td className="text-center"><span className="font-bold" onClick={handleQuarterChange}>Quarter:</span> {quarterDisplay()}</td>
               <td className="text-center"><span className="font-bold">Mode:</span> {game.situation.mode}</td>
             </tr>
           </tbody>

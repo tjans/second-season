@@ -4,6 +4,7 @@ export type ExpressGame = {
     awayTeamId: string;
     leagueId?: string | null;
     situation: ExpressGameState;
+    coinTossWinnerId?: string | null;
 };
 
 export type ExpressGameState = {
@@ -12,7 +13,7 @@ export type ExpressGameState = {
     currentZone?: number | null;
     minute: number;
     possessionId?: string | null;
-    quarter?: 1 | 2 | 3 | 4 | "OT";
-    mode: "PREGAME" | "KICKOFF" | "TD" | "PAT" | "DRIVE" | "EOH" | "EOR" | "FINAL" | "OT"; // end of half, end of regulation, etc
+    quarter?: number | null;
+    mode: "PREGAME" | "KICKOFF" | "PAT" | "DRIVE" | "EOH" | "FINAL" | "OT COIN TOSS"; // end of half, end of regulation, etc
 };
 
