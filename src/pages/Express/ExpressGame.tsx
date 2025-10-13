@@ -189,6 +189,14 @@ export default function ExpressGame() {
           </div>
         }
 
+        {game.situation.mode == "EOH" &&
+          <div className="mb-4 flex justify-center items-center gap-2">
+            <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
+              Start 2nd Half
+            </ButtonLink>
+          </div>
+        }
+
         {game.situation.mode == "DRIVE" &&
           <>
             <div className="mb-4 flex justify-center items-center">

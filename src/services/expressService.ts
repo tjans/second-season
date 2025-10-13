@@ -45,6 +45,8 @@ export default {
         // If it's a safety, we need to swap possession
         if (isSafety) this.swapPossession(gameAfterPlay);
 
+        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
+
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
             situation: gameAfterPlay.situation,
@@ -94,6 +96,11 @@ export default {
 
         // If it's a safety, we need to swap possession
         if (isSafety) this.swapPossession(gameAfterPlay);
+
+        // Handles the cut between quarters, setting the correct mode and everything else
+        // If a TD is scored, we don't check for end of quarter, we need the mode to be PAT
+        // So run the check for end of quarter after the PAT is processed.
+        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
@@ -254,6 +261,8 @@ export default {
             }
         }
 
+        this.checkForEndOfQuarter(gameAfterPlay);
+
         let message = `${offenseTeamBeforePlay.abbreviation} PAT is ${isMade ? "good!" : "no good!"}`;
 
         let log: MutablePlayLog = {
@@ -282,6 +291,8 @@ export default {
                 gameAfterPlay.situation.awayScore += 2;
             }
         }
+
+        this.checkForEndOfQuarter(gameAfterPlay);
 
         let message = `${offenseTeamBeforePlay.abbreviation} 2-pt try is ${isMade ? "successful!" : "unsuccessful!"}`;
 
@@ -422,10 +433,14 @@ export default {
         return gameAfterPlay;
     },
 
+    // If a TD is scored, we don't perform all of the clock advancement logicf
     advanceClock: function (gameAfterPlay: ExpressGame) {
         if (!gameAfterPlay.situation.quarter) throw new Error("Quarter is required to advance the clock");
-
         gameAfterPlay.situation.minute--;
+    },
+
+    checkForEndOfQuarter: function (gameAfterPlay: ExpressGame) {
+        if (!gameAfterPlay.situation.quarter) throw new Error("Quarter is required to check for end of quarter");
 
         let isEndOfQuarter = gameAfterPlay.situation.minute <= 0;
         let isEndOfHalf = isEndOfQuarter && (gameAfterPlay.situation.quarter == 2);
@@ -440,20 +455,17 @@ export default {
             gameAfterPlay.situation.mode = isGameTied ? "OT COIN TOSS" : "FINAL";
 
             gameAfterPlay.situation.minute = 15;
-            gameAfterPlay.situation.currentZone = null;
             gameAfterPlay.situation.possessionId = null; // reset possession for the OT coin toss
 
         } else if (isEndOfHalf) {
             gameAfterPlay.situation.mode = "EOH";
 
             gameAfterPlay.situation.minute = 0;
-            gameAfterPlay.situation.currentZone = null; // reset the zone for the new quarter
             gameAfterPlay.situation.possessionId = null;
 
         } else if (isEndOfQuarter) {
             gameAfterPlay.situation.quarter++;
             gameAfterPlay.situation.minute = 15;
-
         }
     },
 
