@@ -36,6 +36,13 @@ export default function ExpressPass() {
     formState: { errors: intErrors },
   } = useForm<IntFormData>();
 
+  const {
+    register: sackRegister,
+    setValue: setSackValue,
+    handleSubmit: handleSackSubmit,
+    formState: { errors: sackErrors },
+  } = useForm<SackFormData>();
+
   type FormData = {
     zones: string;
     isFumble: boolean;
@@ -45,6 +52,12 @@ export default function ExpressPass() {
     interceptionZone: string;
   }
 
+  type SackFormData = {
+    fumbleReturnZones: string;
+    isLoss: boolean;
+    isFumble: boolean;
+  }
+
   const handleIncomplete = () => {
     let { gameAfterPlay, log } = es.processIncomplete(game, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
@@ -52,11 +65,9 @@ export default function ExpressPass() {
     navigate(gameUrl());
   }
 
-  const handleSack = (oneZoneLoss: boolean) => {
-    let fumbleReturnZones = 0;
+  const onSackSubmit = ({ isLoss, fumbleReturnZones }: SackFormData) => {
+    let { gameAfterPlay, log } = es.processSack(game, isLoss ? -1 : 0, offenseTeam, defenseTeam);
 
-    let zonesLost = oneZoneLoss ? -1 : 0;
-    let { gameAfterPlay, log } = es.processSack(game, zonesLost, fumbleReturnZones, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);
     navigate(gameUrl());
@@ -164,42 +175,55 @@ export default function ExpressPass() {
           {result == "SACK" &&
 
             <>
+              <form onSubmit={handleSackSubmit(onSackSubmit)}>
+                <div className="mb-4 mt-2">
 
-              <div className="mb-4 mt-2">
-                <ToggleButton
-                  className="mt-4"
-                  label="Fumble!"
-                  name="isFumble"
-                  register={register}
-                  onChange={() => {
-                    var newIsFumble = !isFumble;
-                    setIsFumble(newIsFumble);
-                    if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
-                  }}
-                />
+                  <ToggleButton
+                    className="mt-4"
+                    label="Sack for 1 zone loss?"
+                    name="isLoss"
+                    register={sackRegister}
+                  />
 
-                {isFumble &&
-                  <TextInput
-                    label="How many zones was the fumble returned?"
-                    name="fumbleReturnZones"
-                    register={register}
-                    error={errors.fumbleReturnZones}
-                    type="number"
-                    required
-                    rules={{
-                      required: "Fumble return zones is required"
+                  <ToggleButton
+                    className="mt-4"
+                    label="Fumble!"
+                    name="isFumble"
+                    register={sackRegister}
+                    onChange={() => {
+                      var newIsFumble = !isFumble;
+                      setIsFumble(newIsFumble);
+                      if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
                     }}
                   />
-                }
 
-              </div>
+                  {isFumble &&
+                    <TextInput
+                      label="How many zones was the fumble returned?"
+                      name="fumbleReturnZones"
+                      register={sackRegister}
+                      error={sackErrors.fumbleReturnZones}
+                      type="number"
+                      required
+                      rules={{
+                        required: "Fumble return zones is required"
+                      }}
+                    />
+                  }
 
-              <div className="flex gap-2 justify-center">
-                <Button onClick={() => handleSack(false)} color="info">Same zone</Button>
-                <Button onClick={() => handleSack(true)} color="info">1-zone Loss</Button>
-                <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
-              </div>
+                </div>
 
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    type="submit"
+                    color="info"
+                  >
+                    Confirm SACK
+                  </Button>
+
+                  <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                </div>
+              </form>
             </>
           }
 

@@ -154,30 +154,23 @@ export default {
         return { gameAfterPlay, log };
     },
 
-    processSack: function (game: ExpressGame, zonesLost: number, fumbleReturn: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
+    processSack: function (game: ExpressGame, zonesLost: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let gameAfterPlay = structuredClone(game);
+        if (!gameAfterPlay.situation.currentZone) throw new Error("You cannot sack when the currentZone is not set");
 
         let passYardsLost = zonesLost * 7; // sacks are a flat 7 yards per zone lost
 
         this.advanceClock(gameAfterPlay);
         this.setRelativeZone(gameAfterPlay, zonesLost);
-
-        // If there was a fumble, we need to add the zone adjustment to the final zone
-        // swap possession
-        // reverse the field and set the new zone
-        // check for score
-        // change the message
-
-        let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
-        let isSafety = scoreResult === "SAFETY";
+        let isSafety = false;
 
         let message = `${offenseTeam?.abbreviation} is sacked`;
         if (zonesLost < 0) {
             message += ` for a loss to zone ${gameAfterPlay.situation.currentZone}`;
             if (isSafety) message += ", SAFETY!"
         } else {
-            message += `, same zone.`;
+            message += `, same zone`;
         }
 
         let log: MutablePlayLog = {
@@ -193,7 +186,67 @@ export default {
         }
 
         return { gameAfterPlay, log };
+
     },
+
+    // processSack2: function (game: ExpressGame, zonesLost: number, fumbleReturn: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
+    //     console.log("Fumble return: ", fumbleReturn);
+    //     return;
+    //     let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
+    //     let gameAfterPlay = structuredClone(game);
+
+    //     if (!gameAfterPlay.situation.currentZone) throw new Error("You cannot sack when the currentZone is not set");
+
+    //     let passYardsLost = zonesLost * 7; // sacks are a flat 7 yards per zone lost
+
+    //     this.advanceClock(gameAfterPlay);
+    //     this.setRelativeZone(gameAfterPlay, zonesLost);
+
+    //     let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
+    //     let isSafety = scoreResult === "SAFETY";
+
+    //     let message = `${offenseTeam?.abbreviation} is sacked`;
+    //     if (zonesLost < 0) {
+    //         message += ` for a loss to zone ${gameAfterPlay.situation.currentZone}`;
+    //         if (isSafety) message += ", SAFETY!"
+    //     } else {
+    //         message += `, same zone`;
+    //     }
+
+    //     console.log("Zone before fumble: ", gameAfterPlay.situation.currentZone);
+
+
+    //     let isTouchdown = false;
+    //     if (fumbleReturn > 0 && gameAfterPlay.situation.currentZone > 0) {
+    //         this.swapPossession(gameAfterPlay);
+
+    //         let newZone = (gameAfterPlay.situation.currentZone ?? 0) - fumbleReturn;
+    //         message += `, fumble returned to zone ${newZone}`;
+
+    //         this.setNewZone(gameAfterPlay, this.getReverseZone(newZone));
+
+    //         // check for score now that possession has changed
+    //         let scoreResult = this.checkForScore(gameAfterPlay);
+    //         isTouchdown = scoreResult === "TOUCHDOWN";
+    //     }
+
+    //     // if there was a touchdown, don't check for end of quarter, we need the mode to be PAT
+    //     if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
+
+    //     let log: MutablePlayLog = {
+    //         gameId: gameAfterPlay.gameId,
+    //         situation: gameAfterPlay.situation,
+    //         message,
+
+    //         passYardsGained: passYardsLost,
+    //         offenseTeamId: offenseTeam.teamId,
+    //         defenseTeamId: defenseTeam.teamId,
+    //         Safeties: isSafety ? 1 : 0,
+    //         playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
+    //     }
+
+    //     return { gameAfterPlay, log };
+    // },
 
     processKickoff: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
@@ -210,6 +263,8 @@ export default {
         // Build the message
         let message = `${offenseTeamBeforePlay?.abbreviation} kickoff to zone ${finalZone}`;
         if (isTouchdown) message += `, returned for TD!`;
+
+        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
@@ -364,6 +419,8 @@ export default {
             message += `, returned for TD!`;
             gameAfterPlay.situation.mode = "PAT";
         }
+
+        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
