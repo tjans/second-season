@@ -163,15 +163,42 @@ export default {
 
         this.advanceClock(gameAfterPlay);
         this.setRelativeZone(gameAfterPlay, zonesLost);
-        let isSafety = false;
+
+        // check for a safety, since a sack can result in a safety (checkForScore)
+        let isSafety = this.checkForScore(gameAfterPlay) === "SAFETY";
+        let isFumble = false; // TODO: implement fumble logic later
+        let isTouchdown = false;
+
+        /* 
+            check for a fumble, which can be returned for a touchdown 
+                  YES:
+                    swap possession
+                    reverse field
+                    advance ball on the fumble
+                    check for score
+        */
+
+        // if(!isTouchdown) check for end of quarter (we don't do this if there was a touchdown, need mode to be PAT, not EOH or FINAL)
+        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
 
         let message = `${offenseTeam?.abbreviation} is sacked`;
-        if (zonesLost < 0) {
-            message += ` for a loss to zone ${gameAfterPlay.situation.currentZone}`;
-            if (isSafety) message += ", SAFETY!"
+        if (!isFumble) {
+            if (isSafety) message += ` for a SAFETY!`;
+            else if (gameAfterPlay.situation.currentZone == gameBeforePlay.situation.currentZone) message += `, same zone`;
+            else message += ` to zone ${gameAfterPlay.situation.currentZone}`;
         } else {
-            message += `, same zone`;
+            // handle fumble
         }
+        /*
+            if !fumble
+               if (isSafety) message += " for a SAFETY!" 
+               else message += ` to zone ${gameAfterPlay.situation.currentZone}`;
+            else
+               message += `, FUMBLE`
+               if (isTouchdown) message += ` ret. for TD!`
+               else if no return, message += `, no return.`
+               else ret to zone X
+        */
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
