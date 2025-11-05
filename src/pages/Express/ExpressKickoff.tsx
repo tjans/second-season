@@ -18,14 +18,17 @@ export default function ExpressKickoff() {
   const logPlayMutation = useLogPlay();
 
   const handleZoneSelect = (zone: number) => {
-    let { gameAfterPlay, log } = es.processKickoff(game, zone, offenseTeam, defenseTeam);
+    let { gameAfterPlay, log } = es.processKickoff(game, zone, offenseTeam, defenseTeam, false);
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);
     navigate(gameUrl());
   }
 
   const handleFumble = () => {
-    alert("fumble");
+    let { gameAfterPlay, log } = es.processKickoff(game, 2, offenseTeam, defenseTeam, true);
+    saveGameMutation.mutate(gameAfterPlay);
+    logPlayMutation.mutate(log);
+    navigate(gameUrl());
   }
 
   return (

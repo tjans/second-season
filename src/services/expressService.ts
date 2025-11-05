@@ -213,7 +213,7 @@ export default {
 
     },
 
-    processKickoff: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
+    processKickoff: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team, isFumble: boolean): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let gameAfterPlay = structuredClone(game);
 
@@ -225,9 +225,16 @@ export default {
         let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
         let isTouchdown = scoreResult === "TOUCHDOWN";
 
+        let kickingTeam = offenseTeamBeforePlay
+
         // Build the message
         let message = `${offenseTeamBeforePlay?.abbreviation} kickoff to zone ${finalZone}`;
-        if (isTouchdown) message += `, returned for TD!`;
+        if (isFumble) {
+            message += `, fumble!`;
+            this.swapPossession(gameAfterPlay);
+            this.reverseField(gameAfterPlay);
+        }
+        else if (isTouchdown) message += `, returned for TD!`;
 
         if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
 

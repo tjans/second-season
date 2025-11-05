@@ -17,3 +17,5 @@ export type ExpressGameState = {
     mode: "PREGAME" | "KICKOFF" | "PAT" | "DRIVE" | "EOH" | "FINAL" | "OT COIN TOSS"; // end of half, end of regulation, etc
 };
 
+export type PlayCall = "PASS" | "RUN" | "SAFE" | "BLITZ" | "TEND" | "AUDIBLE";
+

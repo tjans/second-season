@@ -18,10 +18,13 @@ import Button from '@/components/Elements/Button';
 import ButtonLink from '@/components/Elements/ButtonLink';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import { PlayLog } from '@/types/PlayLog';
+import { useState } from 'react';
+import { PlayCall } from '@/types/ExpressGame';
 
 
 // This is the main entry point for a game
 export default function ExpressGame() {
+  const [playCall, setPlayCall] = useState<{ offense: PlayCall, defense: PlayCall } | null>(null);
 
   const {
     gameId,
@@ -106,8 +109,45 @@ export default function ExpressGame() {
     logPlayMutation.mutate(playLog);
   }
 
+  const getPlayClass = (call: PlayCall) => {
+    switch (call) {
+      case "PASS":
+        return "text-[#40ad48]";
+      case "RUN":
+        return "text-[#d12229]";
+      case "TEND":
+        return "text-slate-500";
+      case "AUDIBLE":
+        return "text-purple-500";
+      case "SAFE":
+        return "text-[#ff9f00]";
+      case "BLITZ":
+        return "text-[#243f8e]";
+    }
+  }
+
+  const handlePlayCall = () => {
+    let isGoalLine = game.situation.currentZone == 8;
+    let isRedZone = game.situation.currentZone == 7 && game.situation.quarter == 4;
+
+    let useGoalLine = isGoalLine || isRedZone;
+
+    let offenseChart: PlayCall[] = ["PASS", "PASS", "RUN", "RUN", "TEND", "AUDIBLE"];
+    let normalDefenseChart: PlayCall[] = ["PASS", "SAFE", "SAFE", "SAFE", "RUN", "BLITZ"];
+    let goalLineDefenseChart: PlayCall[] = ["PASS", "PASS", "RUN", "RUN", "BLITZ", "BLITZ"];
+
+    let offenseCall: PlayCall = offenseChart[Math.floor(Math.random() * offenseChart.length)];
+    let defenseCall: PlayCall = useGoalLine
+      ? goalLineDefenseChart[Math.floor(Math.random() * goalLineDefenseChart.length)]
+      : normalDefenseChart[Math.floor(Math.random() * normalDefenseChart.length)];
+
+    setPlayCall({ offense: offenseCall, defense: defenseCall });
+  }
+
   const handleUndo = () => {
     if (confirm("Are you sure you want to undo the last action?")) {
+      setPlayCall(null);
+
       // delete the most recent play log for this game
       // if there are no more play logs left, reset the game to pregame state
       // invalidate log and game queries
@@ -162,6 +202,12 @@ export default function ExpressGame() {
             </tr>
           </tbody>
         </table>
+
+        {playCall &&
+          <div className="text-center font-bold mb-6 text-2xl">
+            <span className={getPlayClass(playCall.offense)}>{playCall.offense}</span> vs. <span className={getPlayClass(playCall.defense)}>{playCall.defense}</span>
+          </div>
+        }
 
         {game.situation.mode == "PREGAME" &&
           <>
@@ -218,6 +264,12 @@ export default function ExpressGame() {
             </div>
 
             <div className="mb-4 flex justify-center items-center">
+              <Button onClick={handlePlayCall} color="info" className="mr-2 mb-2">
+                Call Play
+              </Button>
+            </div>
+
+            <div className="mb-4 flex justify-center items-center">
               <Button onClick={handleSwapPossession} color="warning" className="mr-2 mb-2">
                 Swap Possession
               </Button>
@@ -226,15 +278,17 @@ export default function ExpressGame() {
           </>
         }
 
-        <div className="mb-8 text-center">
-          <ButtonLink color="info" to={gameUrl("stats")} className="mr-2">
-            Stats
-          </ButtonLink>
+        {game.situation.mode !== "PREGAME" &&
+          <div className="mb-8 text-center">
+            <ButtonLink color="secondary" to={gameUrl("stats")} className="mr-2">
+              Stats
+            </ButtonLink>
 
-          <Button onClick={handleUndo} color="secondary">
-            Undo
-          </Button>
-        </div>
+            <Button onClick={handleUndo} color="error">
+              Undo
+            </Button>
+          </div>
+        }
 
 
         {playLogs.data.length > 0 &&
