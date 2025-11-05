@@ -7,9 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { TextInput } from '@/components/Elements/TextInput';
 import { useForm } from 'react-hook-form';
 import es from '@/services/expressService';
+import ToggleButton from '@/components/Elements/ToggleButton';
 
 export default function ExpressRun() {
-  const { game, offenseTeam, defenseTeam, gameUrl, saveGameMutation, logPlayMutation, situation } = useExpressGameTools();
+  const { game, offenseTeam, defenseTeam, gameUrl, saveGameMutation, logPlayMutation, situation, isFumble, setIsFumble } = useExpressGameTools();
 
   const navigate = useNavigate();
   usePageTitle("Express Run");
@@ -17,11 +18,14 @@ export default function ExpressRun() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormData>();
 
   type FormData = {
     zones: string;
+    isFumble: boolean;
+    fumbleReturnZones: string;
   }
 
   const onSubmit = (data: FormData) => {
@@ -54,6 +58,32 @@ export default function ExpressRun() {
                   required: "Zones is required"
                 }}
               />
+
+              <ToggleButton
+                className="mt-4"
+                label="Fumble!"
+                name="isFumble"
+                register={register}
+                onChange={() => {
+                  var newIsFumble = !isFumble;
+                  setIsFumble(newIsFumble);
+                  if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
+                }}
+              />
+
+              {isFumble &&
+                <TextInput
+                  label="How many zones was the fumble returned?"
+                  name="fumbleReturnZones"
+                  register={register}
+                  error={errors.fumbleReturnZones}
+                  type="number"
+                  required
+                  rules={{
+                    required: "Fumble return zones is required"
+                  }}
+                />
+              }
 
               <div className="flex justify-center mt-4 gap-2 mb-4">
                 <Button type="submit" color="info">Confirm RUN</Button>
