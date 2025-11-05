@@ -65,8 +65,11 @@ export default function ExpressPass() {
     navigate(gameUrl());
   }
 
-  const onSackSubmit = ({ isLoss, fumbleReturnZones }: SackFormData) => {
-    let { gameAfterPlay, log } = es.processSack(game, isLoss ? -1 : 0, offenseTeam, defenseTeam);
+  const onSackSubmit = ({ isLoss, fumbleReturnZones, isFumble }: SackFormData) => {
+    let lossZones = isLoss ? -1 : 0;
+    let fumbleReturn = isFumble ? Number(fumbleReturnZones) : null;
+
+    let { gameAfterPlay, log } = es.processSack(game, lossZones, fumbleReturn, offenseTeam, defenseTeam);
 
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);

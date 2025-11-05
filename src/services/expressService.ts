@@ -154,7 +154,7 @@ export default {
         return { gameAfterPlay, log };
     },
 
-    processSack: function (game: ExpressGame, zonesLost: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
+    processSack: function (game: ExpressGame, zonesLost: number, fumbleReturnZones: number | null, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let gameAfterPlay = structuredClone(game);
         if (!gameAfterPlay.situation.currentZone) throw new Error("You cannot sack when the currentZone is not set");
@@ -166,19 +166,23 @@ export default {
 
         // check for a safety, since a sack can result in a safety (checkForScore)
         let isSafety = this.checkForScore(gameAfterPlay) === "SAFETY";
-        let isFumble = false; // TODO: implement fumble logic later
+        let isFumble = fumbleReturnZones !== null;
         let isTouchdown = false;
 
-        /* 
-            check for a fumble, which can be returned for a touchdown 
-                  YES:
-                    swap possession
-                    reverse field
-                    advance ball on the fumble
-                    check for score
-        */
+        // Check for a fumble, which can be returned for a TD.  
+        // fumbleReturnZones = null -> no fumble
+        // fumbleReturnZones = 0 -> fumble with no return
+        // fumbleReturnZones > 0 -> fumble returned that many zones
+        if (fumbleReturnZones !== null) {
+            this.swapPossession(gameAfterPlay);
+            this.reverseField(gameAfterPlay); // reverse the field for the defense
+            this.setRelativeZone(gameAfterPlay, fumbleReturnZones);
+            let scoreResult = this.checkForScore(gameAfterPlay);
+            isTouchdown = scoreResult === "TOUCHDOWN";
+        }
 
-        // if(!isTouchdown) check for end of quarter (we don't do this if there was a touchdown, need mode to be PAT, not EOH or FINAL)
+        // if(!isTouchdown) check for end of quarter (we don't do this if there was a touchdown, because we 
+        // need mode to be PAT, not EOH or FINAL)
         if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
 
         let message = `${offenseTeam?.abbreviation} is sacked`;
@@ -187,18 +191,11 @@ export default {
             else if (gameAfterPlay.situation.currentZone == gameBeforePlay.situation.currentZone) message += `, same zone`;
             else message += ` to zone ${gameAfterPlay.situation.currentZone}`;
         } else {
-            // handle fumble
+            message += `, FUMBLE`;
+            if (isTouchdown) message += ` ret. for TD!`;
+            else if (fumbleReturnZones === 0) message += `, no return.`;
+            else message += ` ret. to zone ${gameAfterPlay.situation.currentZone}`;
         }
-        /*
-            if !fumble
-               if (isSafety) message += " for a SAFETY!" 
-               else message += ` to zone ${gameAfterPlay.situation.currentZone}`;
-            else
-               message += `, FUMBLE`
-               if (isTouchdown) message += ` ret. for TD!`
-               else if no return, message += `, no return.`
-               else ret to zone X
-        */
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
@@ -215,65 +212,6 @@ export default {
         return { gameAfterPlay, log };
 
     },
-
-    // processSack2: function (game: ExpressGame, zonesLost: number, fumbleReturn: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
-    //     console.log("Fumble return: ", fumbleReturn);
-    //     return;
-    //     let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
-    //     let gameAfterPlay = structuredClone(game);
-
-    //     if (!gameAfterPlay.situation.currentZone) throw new Error("You cannot sack when the currentZone is not set");
-
-    //     let passYardsLost = zonesLost * 7; // sacks are a flat 7 yards per zone lost
-
-    //     this.advanceClock(gameAfterPlay);
-    //     this.setRelativeZone(gameAfterPlay, zonesLost);
-
-    //     let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
-    //     let isSafety = scoreResult === "SAFETY";
-
-    //     let message = `${offenseTeam?.abbreviation} is sacked`;
-    //     if (zonesLost < 0) {
-    //         message += ` for a loss to zone ${gameAfterPlay.situation.currentZone}`;
-    //         if (isSafety) message += ", SAFETY!"
-    //     } else {
-    //         message += `, same zone`;
-    //     }
-
-    //     console.log("Zone before fumble: ", gameAfterPlay.situation.currentZone);
-
-
-    //     let isTouchdown = false;
-    //     if (fumbleReturn > 0 && gameAfterPlay.situation.currentZone > 0) {
-    //         this.swapPossession(gameAfterPlay);
-
-    //         let newZone = (gameAfterPlay.situation.currentZone ?? 0) - fumbleReturn;
-    //         message += `, fumble returned to zone ${newZone}`;
-
-    //         this.setNewZone(gameAfterPlay, this.getReverseZone(newZone));
-
-    //         // check for score now that possession has changed
-    //         let scoreResult = this.checkForScore(gameAfterPlay);
-    //         isTouchdown = scoreResult === "TOUCHDOWN";
-    //     }
-
-    //     // if there was a touchdown, don't check for end of quarter, we need the mode to be PAT
-    //     if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
-
-    //     let log: MutablePlayLog = {
-    //         gameId: gameAfterPlay.gameId,
-    //         situation: gameAfterPlay.situation,
-    //         message,
-
-    //         passYardsGained: passYardsLost,
-    //         offenseTeamId: offenseTeam.teamId,
-    //         defenseTeamId: defenseTeam.teamId,
-    //         Safeties: isSafety ? 1 : 0,
-    //         playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
-    //     }
-
-    //     return { gameAfterPlay, log };
-    // },
 
     processKickoff: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
@@ -475,6 +413,11 @@ export default {
 
     getReverseZone: function (zone: number): number {
         return (9 - zone);
+    },
+
+    reverseField: function (gameAfterPlay: ExpressGame) {
+        if (!gameAfterPlay?.situation?.currentZone) throw new Error("Game is required");
+        gameAfterPlay.situation.currentZone = this.getReverseZone(gameAfterPlay.situation.currentZone);
     },
 
     calculateYardage: function (startZone: number, delta: number) {
