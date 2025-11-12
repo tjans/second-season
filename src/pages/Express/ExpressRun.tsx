@@ -25,11 +25,14 @@ export default function ExpressRun() {
   type FormData = {
     zones: string;
     isFumble: boolean;
-    fumbleReturnZones: string;
+    fumbleReturnZones: string | null;
   }
 
   const onSubmit = (data: FormData) => {
-    let { gameAfterPlay, log } = es.processRun(game, Number(data.zones), offenseTeam, defenseTeam);
+    let fumbleReturn = isFumble ? Number(data.fumbleReturnZones) : null;
+
+    let { gameAfterPlay, log } = es.processRun(game, Number(data.zones), fumbleReturn, offenseTeam, defenseTeam);
+
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);
     navigate(gameUrl());

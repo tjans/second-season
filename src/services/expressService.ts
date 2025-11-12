@@ -65,7 +65,7 @@ export default {
         return { gameAfterPlay, log };
     },
 
-    processRun: function (game: ExpressGame, zones: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
+    processRun: function (game: ExpressGame, zones: number, fumbleReturnZones: number | null, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let zoneDelta = Number(zones);
 
@@ -88,19 +88,44 @@ export default {
         let passYardsGained = 0;
         let rushYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
 
-        // Build the message
-        let message = "UNKNOWN RUN PLAY";
-        message = `${offenseTeam?.abbreviation} run sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
-        if (isTouchdown) message += `, TD!`;
-        if (isSafety) message += `, SAFETY!`;
+        // Check for a fumble, which can be returned for a TD.  
+        // fumbleReturnZones = null -> no fumble
+        // fumbleReturnZones = 0 -> fumble with no return
+        // fumbleReturnZones > 0 -> fumble returned that many zones
 
-        // If it's a safety, we need to swap possession
-        if (isSafety) this.swapPossession(gameAfterPlay);
+        if (fumbleReturnZones !== null) {
+
+            this.swapPossession(gameAfterPlay);
+            this.reverseField(gameAfterPlay); // reverse the field for the defense
+            this.setRelativeZone(gameAfterPlay, fumbleReturnZones);
+            let scoreResult = this.checkForScore(gameAfterPlay);
+            isTouchdown = scoreResult === "TOUCHDOWN";
+        } else {
+            // If it's a safety, we need to swap possession back
+            if (isSafety) this.swapPossession(gameAfterPlay);
+        }
 
         // Handles the cut between quarters, setting the correct mode and everything else
         // If a TD is scored, we don't check for end of quarter, we need the mode to be PAT
         // So run the check for end of quarter after the PAT is processed.
         if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
+
+        // Build the message
+        let message = "UNKNOWN RUN PLAY";
+        message = `${offenseTeam?.abbreviation} run sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
+
+        if (fumbleReturnZones !== null) {
+            message += `, FUMBLE`;
+            if (isTouchdown) message += ` ret. for TD!`;
+            else if (fumbleReturnZones === 0) message += `, no return.`;
+            else message += ` ret. ${fumbleReturnZones} zone${fumbleReturnZones === 1 ? "" : "s"}`;
+
+        } else if (isTouchdown) {
+            message += `, TD!`;
+
+        } else if (isSafety) {
+            message += `, SAFETY!`;
+        }
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
@@ -224,8 +249,6 @@ export default {
 
         let scoreResult = this.checkForScore(gameAfterPlay); // sacks can't score, but we need to check for safeties
         let isTouchdown = scoreResult === "TOUCHDOWN";
-
-        let kickingTeam = offenseTeamBeforePlay
 
         // Build the message
         let message = `${offenseTeamBeforePlay?.abbreviation} kickoff to zone ${finalZone}`;
