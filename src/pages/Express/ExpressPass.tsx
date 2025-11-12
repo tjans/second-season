@@ -15,7 +15,7 @@ export default function ExpressPass() {
   const {
     offenseTeam, defenseTeam,
     gameUrl,
-    game, saveGameMutation, logPlayMutation, gameId, situation,
+    game, saveGameMutation, logPlayMutation, situation,
     isFumble, setIsFumble } = useExpressGameTools();
 
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>("CMP");
@@ -38,7 +38,6 @@ export default function ExpressPass() {
 
   const {
     register: sackRegister,
-    setValue: setSackValue,
     handleSubmit: handleSackSubmit,
     formState: { errors: sackErrors },
   } = useForm<SackFormData>();
@@ -78,7 +77,9 @@ export default function ExpressPass() {
 
   // Handle fumbles
   const onSubmit = (data: FormData) => {
-    let { gameAfterPlay, log } = es.processPass(game, Number(data.zones), offenseTeam, defenseTeam);
+    let fumbleReturn = isFumble ? Number(data.fumbleReturnZones) : null
+
+    let { gameAfterPlay, log } = es.processPass(game, Number(data.zones), fumbleReturn, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);
     navigate(gameUrl());
@@ -124,6 +125,32 @@ export default function ExpressPass() {
                     required: "Zones is required"
                   }}
                 />
+
+                <ToggleButton
+                  className="mt-4"
+                  label="Fumble!"
+                  name="isFumble"
+                  register={register}
+                  onChange={() => {
+                    var newIsFumble = !isFumble;
+                    setIsFumble(newIsFumble);
+                    if (!newIsFumble) setValue("fumbleReturnZones", ""); // clear fumble return zones if toggled off
+                  }}
+                />
+
+                {isFumble &&
+                  <TextInput
+                    label="How many zones was the fumble returned?"
+                    name="fumbleReturnZones"
+                    register={register}
+                    error={errors.fumbleReturnZones}
+                    type="number"
+                    required
+                    rules={{
+                      required: "Fumble return zones is required"
+                    }}
+                  />
+                }
 
                 <div className="flex justify-center mt-4 gap-2 mb-4">
                   <Button type="submit" color="info">Confirm CMP</Button>

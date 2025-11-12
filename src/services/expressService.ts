@@ -13,7 +13,7 @@ export default {
     /**************************************************************************************************************************
     * Main functions to process plays
     **************************************************************************************************************************/
-    processPass: function (game: ExpressGame, zones: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
+    processPass: function (game: ExpressGame, zones: number, fumbleReturnZones: number | null, offenseTeam: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let zoneDelta = Number(zones);
 
@@ -36,27 +36,42 @@ export default {
         let rushYardsGained = 0;
         let passYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
 
+        if (fumbleReturnZones !== null) {
+            this.swapPossession(gameAfterPlay);
+            this.reverseField(gameAfterPlay); // reverse the field for the defense
+            this.setRelativeZone(gameAfterPlay, fumbleReturnZones);
+            let scoreResult = this.checkForScore(gameAfterPlay);
+            isTouchdown = scoreResult === "TOUCHDOWN";
+        } else {
+            // If it's a safety, we need to swap possession back
+            if (isSafety) this.swapPossession(gameAfterPlay);
+        }
+
+        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
+
         // Build the message
         let message = "UNKNOWN PASS PLAY";
         message = `${offenseTeam?.abbreviation} pass sequence for ${actualDelta} zone${actualDelta === 1 ? "" : "s"}`;
-        if (isTouchdown) message += `, TD!`;
-        if (isSafety) message += `, SAFETY!`;
 
-        // If it's a safety, we need to swap possession
-        if (isSafety) this.swapPossession(gameAfterPlay);
+        if (fumbleReturnZones !== null) {
+            message += `, FUMBLE`;
+            if (isTouchdown) message += ` ret. for TD!`;
+            else if (fumbleReturnZones === 0) message += `, no return.`;
+            else message += ` ret. ${fumbleReturnZones} zone${fumbleReturnZones === 1 ? "" : "s"}`;
 
-        if (!isTouchdown) this.checkForEndOfQuarter(gameAfterPlay);
+        } else if (isTouchdown) {
+            message += `, TD!`;
+
+        } else if (isSafety) {
+            message += `, SAFETY!`;
+        }
 
         let log: MutablePlayLog = {
             gameId: gameAfterPlay.gameId,
             situation: gameAfterPlay.situation,
             message,
-
             passYardsGained: passYardsGained,
             rushYardsGained: rushYardsGained,
-            offenseTeamId: offenseTeam.teamId,
-            defenseTeamId: defenseTeam.teamId,
-            scoringTeamId: isTouchdown ? offenseTeam.teamId : undefined,
             TD: isTouchdown ? 1 : 0,
             Safeties: isSafety ? 1 : 0,
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
@@ -87,11 +102,6 @@ export default {
         let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
         let passYardsGained = 0;
         let rushYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
-
-        // Check for a fumble, which can be returned for a TD.  
-        // fumbleReturnZones = null -> no fumble
-        // fumbleReturnZones = 0 -> fumble with no return
-        // fumbleReturnZones > 0 -> fumble returned that many zones
 
         if (fumbleReturnZones !== null) {
 

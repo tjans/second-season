@@ -4,8 +4,8 @@ export type MutablePlayLog = {
     gameId: string;
     situation: ExpressGameState;
     message: string;
-    offenseTeamId: string;
-    defenseTeamId: string;
+    offenseTeamId?: string;
+    defenseTeamId?: string;
     scoringTeamId?: string;
     TD?: number;
     Safeties?: number;
