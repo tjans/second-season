@@ -3,6 +3,7 @@ import { ExpressGame } from "@/types/ExpressGame";
 import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { playLogKeys } from "./playLogQueries";
+import { expressTeamStatKeys } from "./expressTeamStatQueries";
 
 // #region Keys
 export const expressGameKeys = {
@@ -12,15 +13,15 @@ export const expressGameKeys = {
 // #endregion
 
 //#region Query options
-export const useExpressGame = (gameId: string, options?:SafeQueryOptionsFor<ExpressGame>) => 
-  useSuspenseQuery({
-    queryKey: expressGameKeys.expressGame(gameId),
-    queryFn: () => expressGameService.getGame(gameId),
-    ...options
-  }) 
+export const useExpressGame = (gameId: string, options?: SafeQueryOptionsFor<ExpressGame>) =>
+    useSuspenseQuery({
+        queryKey: expressGameKeys.expressGame(gameId),
+        queryFn: () => expressGameService.getGame(gameId),
+        ...options
+    })
 
 
-  export function useSaveGame() {
+export function useSaveGame() {
     const queryClient = useQueryClient(); // Use the existing query client from context
 
     return useMutation({
@@ -43,6 +44,7 @@ export const useUndo = () => {
             // Invalidate all queries that start with [playLog]
             queryClient.invalidateQueries({ queryKey: playLogKeys.game(variables.gameId) });
             queryClient.invalidateQueries({ queryKey: expressGameKeys.expressGame(variables.gameId) });
+            queryClient.invalidateQueries({ queryKey: expressTeamStatKeys.expressTeamStat(variables.gameId, variables.gameId) });
         }
     });
 }

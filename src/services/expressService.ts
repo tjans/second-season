@@ -1,4 +1,5 @@
 import { ExpressGame } from "@/types/ExpressGame";
+import { ExpressTeamStat } from "@/types/ExpressTeamStats";
 import { MutablePlayLog } from "@/types/PlayLog";
 import { ScoreResult } from "@/types/ScoreResult";
 import { Team } from "@/types/Team";
@@ -6,6 +7,7 @@ import { Team } from "@/types/Team";
 type ProcessPlayResult = {
     gameAfterPlay: ExpressGame;
     log: MutablePlayLog;
+    stats: ExpressTeamStat[];
 }
 
 export default {
@@ -103,14 +105,25 @@ export default {
         let passYardsGained = 0;
         let rushYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
 
-        if (fumbleReturnZones !== null) {
+        let rushingStat: ExpressTeamStat = {
+            gameId: game.gameId,
+            teamId: offenseTeam.teamId,
+            rushYardsGained
+        }
 
+        if (fumbleReturnZones !== null) {
             this.swapPossession(gameAfterPlay);
             this.reverseField(gameAfterPlay); // reverse the field for the defense
             this.setRelativeZone(gameAfterPlay, fumbleReturnZones);
             let scoreResult = this.checkForScore(gameAfterPlay);
             isTouchdown = scoreResult === "TOUCHDOWN";
+
+            rushingStat.fumble = 1;
+            if (isTouchdown) rushingStat.fumbleTD = 1;
+
         } else {
+            if (isTouchdown) rushingStat.rushTD = 1;
+
             // If it's a safety, we need to swap possession back
             if (isSafety) this.swapPossession(gameAfterPlay);
         }
@@ -153,7 +166,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [rushingStat] };
     },
 
     processInterception: function (game: ExpressGame, finalZone: number, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {

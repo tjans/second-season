@@ -1,7 +1,7 @@
-import {db} from '@/db';
+import { db } from '@/db';
 import { ExpressGame } from '@/types/ExpressGame';
 import playLogService from './playLogService';
-import { PlayLog } from '@/types/PlayLog';
+import expressTeamStatService from './expressTeamStatService';
 
 export default {
     getGame: async (gameId: string): Promise<ExpressGame> => {
@@ -15,7 +15,9 @@ export default {
     },
 
     undo: async (game: ExpressGame): Promise<void> => {
-        await playLogService.deleteLastLog(game.gameId)
+        let logId = await playLogService.deleteLastLog(game.gameId)
+        console.log("Deleted log with id:", logId);
+
         let lastLog = await db.playLogs.where({ gameId: game.gameId }).sortBy('date');
         if (lastLog.length === 0) {
             // no more logs, reset game to pregame state
@@ -27,11 +29,13 @@ export default {
                 possessionId: null,
                 quarter: 1,
                 mode: "PREGAME"
-            }    
+            }
         } else {
             let mostRecentLog = lastLog[lastLog.length - 1];
             game.situation = mostRecentLog.situation;
         }
+
+        if (logId) await expressTeamStatService.deleteStatsByLogId(logId);
 
         await db.expressGames.put(game);
     }

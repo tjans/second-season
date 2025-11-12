@@ -2,8 +2,6 @@ import playLogService from "@/services/playLogService";
 import { MutablePlayLog, PlayLog } from "@/types/PlayLog";
 import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { expressGameKeys } from "./expressGameQueries";
-import { use } from "react";
 
 // #region Keys
 export const playLogKeys = {
@@ -35,7 +33,8 @@ export const useLogPlay = () => {
                 logId: crypto.randomUUID(),
                 date: new Date().toISOString()
             } as PlayLog;
-            playLogService.logPlay(fullLog)
+            await playLogService.logPlay(fullLog);
+            return fullLog.logId;
         },
         onSuccess: (_data, variables) => {
             // Invalidate all queries that start with [playLog]

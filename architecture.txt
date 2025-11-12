@@ -1,5 +1,4 @@
 Add stats along with the log
-Fumble on pass, run
 Refactor "move ball" and take in options object instead of separate parameters
 
 Clock/quarter
@@ -14,23 +13,6 @@ Styling/Game day
 Dark mode
 Stats Screen (general)
 Stats Screen (calculated)
-
-
-
-MoveRelative
-SetBall
-Increase clock
-TD/Safety check
-Possession Change
-Yardage Gained/Lost
-Build the message
-Update the game
-Log the play
-
-
-
-
-
 
 
 

@@ -1,4 +1,5 @@
 import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
+import { useSaveTeamStats } from "@/queries/expressTeamStatQueries";
 import { useLogPlay } from "@/queries/playLogQueries";
 import { useTeam } from "@/queries/teamQueries";
 import { useState } from "react";
@@ -17,6 +18,7 @@ const useExpressGameTools = () => {
     const saveGameMutation = useSaveGame();
     const logPlayMutation = useLogPlay();
     const undoMutation = useUndo();
+    const saveTeamStatMutation = useSaveTeamStats();
 
     const offenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? homeTeam.data : awayTeam.data;
     const defenseTeam = game.data.situation.possessionId === game.data.homeTeamId ? awayTeam.data : homeTeam.data;
@@ -61,6 +63,7 @@ const useExpressGameTools = () => {
         saveGameMutation,
         logPlayMutation,
         undoMutation,
+        saveTeamStatMutation,
         isFumble, setIsFumble
     };
 }

@@ -4,21 +4,24 @@ import { ExpressGameState } from "./types/ExpressGame";
 import { Finder, Team } from "./types/Team";
 import { PlayLog } from "./types/PlayLog";
 import { Player } from "./types/Player";
+import { ExpressTeamStat } from "./types/ExpressTeamStats";
 
 class SecondSeasonManagerDatabase extends Dexie {
   expressGames!: Table<ExpressGame, string>;
   teams!: Table<Team, string>;
   players!: Table<Player, string>;
   playLogs!: Table<PlayLog, string>; // Add this line for the stats table
+  expressTeamStats!: Table<ExpressTeamStat, string>;
 
   constructor() {
     super("second-season");
 
-    this.version(1).stores({
+    this.version(2).stores({
       expressGames: 'gameId, leagueId',
       teams: 'teamId',
       players: 'playerId, position',
-      playLogs: '++logId, gameId, logDate'
+      playLogs: '++logId, gameId, logDate',
+      expressTeamStats: '++statId, gameId, teamId, logId'
     });
   }
 }

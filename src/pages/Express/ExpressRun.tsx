@@ -10,7 +10,7 @@ import es from '@/services/expressService';
 import ToggleButton from '@/components/Elements/ToggleButton';
 
 export default function ExpressRun() {
-  const { game, offenseTeam, defenseTeam, gameUrl, saveGameMutation, logPlayMutation, situation, isFumble, setIsFumble } = useExpressGameTools();
+  const { game, offenseTeam, defenseTeam, gameUrl, saveGameMutation, logPlayMutation, situation, isFumble, setIsFumble, saveTeamStatMutation } = useExpressGameTools();
 
   const navigate = useNavigate();
   usePageTitle("Express Run");
@@ -28,13 +28,17 @@ export default function ExpressRun() {
     fumbleReturnZones: string | null;
   }
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     let fumbleReturn = isFumble ? Number(data.fumbleReturnZones) : null;
 
-    let { gameAfterPlay, log } = es.processRun(game, Number(data.zones), fumbleReturn, offenseTeam, defenseTeam);
+    let { gameAfterPlay, log, stats } = es.processRun(game, Number(data.zones), fumbleReturn, offenseTeam, defenseTeam);
 
     saveGameMutation.mutate(gameAfterPlay);
-    logPlayMutation.mutate(log);
+    const logId = await logPlayMutation.mutateAsync(log);
+
+    // Save the stat lines
+    stats.forEach(statLine => saveTeamStatMutation.mutate({ ...statLine, logId }));
+
     navigate(gameUrl());
   }
 
