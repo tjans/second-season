@@ -4,8 +4,10 @@ import useExpressGameTools from '@/hooks/useExpressGameTools';
 import { useTeamStats } from '@/queries/expressTeamStatQueries';
 import { ExpressTeamStat } from '@/types/ExpressTeamStats';
 import { Button } from '@/components/ui/button';
+import { useMemo } from 'react';
 
 export default function ExpressStats() {
+  console.log('Rendering ExpressStats component');
   const { gameId, homeTeam, awayTeam, gameUrl } = useExpressGameTools();
   const homeTeamStats = useTeamStats(gameId, homeTeam.teamId);
   const awayTeamStats = useTeamStats(gameId, awayTeam.teamId);
@@ -35,12 +37,11 @@ export default function ExpressStats() {
 
   usePageTitle("Express Stats");
 
-  // This is seemgingly repeated a bunch of times.  We should make this more efficient, or memoize it.
-  const homeRushingStats = getRushingStats(homeTeamStats.data);
-  const awayRushingStats = getRushingStats(awayTeamStats.data);
+  const homeRushingStats = useMemo(() => getRushingStats(homeTeamStats.data), [homeTeamStats.data]);
+  const awayRushingStats = useMemo(() => getRushingStats(awayTeamStats.data), [awayTeamStats.data]);
 
-  const homePassingStats = getPassingStats(homeTeamStats.data);
-  const awayPassingStats = getPassingStats(awayTeamStats.data);
+  const homePassingStats = useMemo(() => getPassingStats(homeTeamStats.data), [homeTeamStats.data]);
+  const awayPassingStats = useMemo(() => getPassingStats(awayTeamStats.data), [awayTeamStats.data]);
 
   return (
     <>

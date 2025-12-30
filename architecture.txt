@@ -1,4 +1,14 @@
 Add stats along with the log
+    incomplete
+    sack
+    interception
+    fumble
+    kickoff return
+    punt return
+    field goal
+    punt
+
+
 Refactor "move ball" and take in options object instead of separate parameters
 
 Clock/quarter
