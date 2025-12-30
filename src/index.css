@@ -97,7 +97,7 @@
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: #757575;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -187,17 +187,7 @@
   --color-success-fg: #FFFFFF;
   --color-info: #0EA5E9;
   --color-info-fg: #FFFFFF;
-}
 
-/*
-export const COLORS= {
-  primary: "blue-600", // Main brand color
-    secondary: "gray-500", // Secondary/neutral color  
-    success: "green-600", // Success states and positive actions
-    error: "red-600", // Error states and destructive actions
-    warning: "yellow-300", // Warning states and caution
-    info: "sky-500", // Informational content and neutral actions
+  --color-soft: '#757575',
+    --color-lightGray: '#CECECE',
 }
-
-as const;
-*/

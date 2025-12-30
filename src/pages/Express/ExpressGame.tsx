@@ -9,14 +9,12 @@ import usePageTitle from '@/hooks/usePageTitle'
 
 // components
 import ContentWrapper from "@/components/ContentWrapper";
-import { Button as ShadButton } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 // queries
 import { usePlayLogs } from '@/queries/playLogQueries';
 
 // elements
-import Button from '@/components/Elements/Button';
-import ButtonLink from '@/components/Elements/ButtonLink';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import { PlayLog } from '@/types/PlayLog';
 import { useState } from 'react';
@@ -222,55 +220,55 @@ export default function ExpressGame() {
 
         {game.situation.mode == "KICKOFF" &&
           <div className="mb-4 flex justify-center items-center gap-2">
-            <ButtonLink to={gameUrl("kickoff")} className="mr-2 mb-2">
+            <Button to={gameUrl("kickoff")} className="mr-2 mb-2">
               Kickoff
-            </ButtonLink>
+            </Button>
           </div>
         }
 
         {game.situation.mode == "PAT" &&
           <div className="mb-4 flex justify-center items-center gap-2">
-            <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
+            <Button to={gameUrl("pat")} className="mr-2 mb-2">
               PAT / 2-pt
-            </ButtonLink>
+            </Button>
           </div>
         }
 
         {game.situation.mode == "EOH" &&
           <div className="mb-4 flex justify-center items-center gap-2">
-            <ButtonLink to={gameUrl("pat")} className="mr-2 mb-2">
+            <Button to={gameUrl("pat")} className="mr-2 mb-2">
               Start 2nd Half
-            </ButtonLink>
+            </Button>
           </div>
         }
 
         {game.situation.mode == "DRIVE" &&
           <>
             <div className="mb-4 flex justify-center items-center">
-              <ShadButton to={gameUrl("pass")} className="mr-2 mb-2">
+              <Button to={gameUrl("pass")} className="mr-2 mb-2">
                 Pass
-              </ShadButton>
+              </Button>
 
-              <ShadButton to={gameUrl("run")} className="mr-2 mb-2">
+              <Button to={gameUrl("run")} className="mr-2 mb-2">
                 Run
-              </ShadButton>
-              <ShadButton to={gameUrl("fg")} className="mr-2 mb-2">
+              </Button>
+              <Button to={gameUrl("fg")} className="mr-2 mb-2">
                 FG
-              </ShadButton>
+              </Button>
 
-              <ShadButton to={gameUrl("punt")} className="mr-2 mb-2">
+              <Button to={gameUrl("punt")} className="mr-2 mb-2">
                 Punt
-              </ShadButton>
+              </Button>
             </div>
 
             <div className="mb-4 flex justify-center items-center">
-              <Button onClick={handlePlayCall} color="info" className="mr-2 mb-2">
+              <Button onClick={handlePlayCall} variant="info" className="mr-2 mb-2">
                 Call Play
               </Button>
             </div>
 
             <div className="mb-4 flex justify-center items-center">
-              <Button onClick={handleSwapPossession} color="warning" className="mr-2 mb-2">
+              <Button onClick={handleSwapPossession} variant="warning" className="mr-2 mb-2">
                 Swap Possession
               </Button>
             </div>
@@ -280,11 +278,11 @@ export default function ExpressGame() {
 
         {game.situation.mode !== "PREGAME" &&
           <div className="mb-8 text-center">
-            <ButtonLink color="secondary" to={gameUrl("stats")} className="mr-2">
+            <Button variant="secondary" to={gameUrl("stats")} className="mr-2">
               Stats
-            </ButtonLink>
+            </Button>
 
-            <Button onClick={handleUndo} color="error">
+            <Button onClick={handleUndo} variant="error">
               Undo
             </Button>
           </div>

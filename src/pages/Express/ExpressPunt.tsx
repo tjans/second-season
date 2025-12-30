@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { SelectInput } from '@/components/Elements/SelectInput';
 import es from '@/services/expressService';
+import { Button as ShadButton } from '@/components/ui/button';
 
 export default function ExpressPunt() {
   const { game, defenseTeam, saveGameMutation, logPlayMutation, offenseTeam, gameUrl, situation } = useExpressGameTools();
@@ -68,8 +69,8 @@ export default function ExpressPunt() {
               }}
             />
             <div className="flex justify-center mt-4 gap-2 mb-4">
-              <Button type="submit" color="info">Confirm PUNT</Button>
-              <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+              <ShadButton type="submit" variant="info">Confirm PUNT</ShadButton>
+              <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>
             </div>
           </form>
 

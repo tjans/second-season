@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import usePageTitle from '@/hooks/usePageTitle';
 import ContentWrapper from '@/components/ContentWrapper';
-import Button from '@/components/Elements/Button';
+import { Button as ShadButton } from '@/components/ui/button';
 
 const Buttons: React.FC = () => {
     usePageTitle('Material Design Button Components');
-    
+
     // State for click-once loading demo
     const [isLoading, setIsLoading] = useState(false);
 
@@ -45,26 +45,26 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Button Variants</h2>
                     <p className="text-gray-600 mb-6">Five distinct Material Design 3 button styles for different use cases</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div className="text-center">
-                            <Button variant="filled">Filled Button</Button>
+                            <ShadButton variant="filled">Filled Button</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Primary actions</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="outlined">Outlined Button</Button>
+                            <ShadButton variant="outlined">Outlined Button</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Secondary actions</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="text">Text Button</Button>
+                            <ShadButton variant="text">Text Button</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Tertiary actions</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="elevated">Elevated Button</Button>
+                            <ShadButton variant="elevated">Elevated Button</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Prominent secondary</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="tonal">Tonal Button</Button>
+                            <ShadButton variant="tonal">Tonal Button</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Subtle emphasis</p>
                         </div>
                     </div>
@@ -74,33 +74,33 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Simple Color Override</h2>
                     <p className="text-gray-600 mb-6">Easily override button colors with the `color` prop</p>
-                    
+
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-sm font-medium text-gray-700 mb-3">Using Predefined Colors</h3>
                             <div className="flex flex-wrap gap-3">
-                                <Button variant="filled" color="primary">Primary</Button>
-                                <Button variant="filled" color="secondary">Secondary</Button>
-                                <Button variant="filled" color="success">Success</Button>
-                                <Button variant="filled" color="error">Error</Button>
-                                <Button variant="filled" color="info">Info</Button>
-                                <Button variant="filled" color="warning">Warning</Button>
+                                <ShadButton variant="filled" color="primary">Primary</ShadButton>
+                                <ShadButton variant="filled" color="secondary">Secondary</ShadButton>
+                                <ShadButton variant="filled" color="success">Success</ShadButton>
+                                <ShadButton variant="filled" color="error">Error</ShadButton>
+                                <ShadButton variant="filled" color="info">Info</ShadButton>
+                                <ShadButton variant="filled" color="warning">Warning</ShadButton>
                             </div>
                         </div>
-                        
+
                         <div>
                             <h3 className="text-sm font-medium text-gray-700 mb-3">Using Custom Tailwind Classes</h3>
                             <div className="flex flex-wrap gap-3">
-                                <Button variant="filled" overrideClasses="bg-purple-500 hover:bg-purple-600 text-white">Purple</Button>
-                                <Button variant="outlined" overrideClasses="border-orange-500 text-orange-500 hover:bg-orange-50">Orange</Button>
-                                <Button variant="text" overrideClasses="text-teal-500 hover:bg-teal-50">Teal</Button>
-                                <Button variant="filled" overrideClasses="bg-pink-500 hover:bg-pink-600 text-white">Pink</Button>
+                                <ShadButton variant="filled" overrideClasses="bg-purple-500 hover:bg-purple-600 text-white">Purple</ShadButton>
+                                <ShadButton variant="outline" overrideClasses="border-orange-500 text-orange-500 hover:bg-orange-50">Orange</ShadButton>
+                                <ShadButton variant="text" overrideClasses="text-teal-500 hover:bg-teal-50">Teal</ShadButton>
+                                <ShadButton variant="filled" overrideClasses="bg-pink-500 hover:bg-pink-600 text-white">Pink</ShadButton>
                             </div>
                         </div>
-                        
+
                         <div className="mt-4 p-3 bg-blue-50 rounded-md">
                             <p className="text-sm text-blue-700">
-                                <strong>💡 Usage:</strong> Use <code className="bg-white px-1 rounded">color="primary"</code> for predefined colors, 
+                                <strong>💡 Usage:</strong> Use <code className="bg-white px-1 rounded">color="primary"</code> for predefined colors,
                                 or <code className="bg-white px-1 rounded">overrideClasses="bg-purple-500 hover:bg-purple-600"</code> for custom styling.
                                 Always include hover states for better UX!
                             </p>
@@ -112,18 +112,18 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Button Sizes</h2>
                     <p className="text-gray-600 mb-6">Three size variants to fit different UI contexts</p>
-                    
+
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="text-center">
-                            <Button variant="filled" size="sm">Small</Button>
+                            <ShadButton variant="filled" size="sm">Small</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Compact spaces</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="filled" size="md">Medium</Button>
+                            <ShadButton variant="filled" size="md">Medium</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Default size</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="filled" size="lg">Large</Button>
+                            <ShadButton variant="filled" size="lg">Large</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Prominent actions</p>
                         </div>
                     </div>
@@ -133,18 +133,18 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Button States</h2>
                     <p className="text-gray-600 mb-6">Interactive states and accessibility features</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="text-center">
-                            <Button variant="filled">Normal State</Button>
+                            <ShadButton variant="filled">Normal State</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Default interactive state</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="filled" loading>Loading State</Button>
+                            <ShadButton variant="filled" loading>Loading State</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Processing indication</p>
                         </div>
                         <div className="text-center">
-                            <Button variant="filled" disabled>Disabled State</Button>
+                            <ShadButton variant="filled" disabled>Disabled State</ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Inactive/unavailable</p>
                         </div>
                     </div>
@@ -154,59 +154,59 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Buttons with Icons</h2>
                     <p className="text-gray-600 mb-6">Enhanced buttons with leading and trailing icons</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <h3 className="text-sm font-medium text-gray-700">Leading Icons</h3>
                             <div className="space-y-3">
-                                <Button 
-                                    variant="filled" 
-                                    icon={<span>⭐</span>} 
+                                <ShadButton
+
+                                    icon={<span>⭐</span>}
                                     iconPosition="left"
                                 >
                                     Favorite
-                                </Button>
-                                <Button 
-                                    variant="outlined" 
-                                    icon={<span>📥</span>} 
+                                </ShadButton>
+                                <ShadButton
+                                    variant="outline"
+                                    icon={<span>📥</span>}
                                     iconPosition="left"
                                 >
                                     Download
-                                </Button>
-                                <Button 
-                                    variant="text" 
-                                    icon={<span>➕</span>} 
+                                </ShadButton>
+                                <ShadButton
+                                    variant="ghost"
+                                    icon={<span>➕</span>}
                                     iconPosition="left"
                                 >
                                     Add Item
-                                </Button>
+                                </ShadButton>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <h3 className="text-sm font-medium text-gray-700">Trailing Icons</h3>
                             <div className="space-y-3">
-                                <Button 
-                                    variant="elevated" 
-                                    icon={<span>→</span>} 
+                                <ShadButton
+                                    variant="elevated"
+                                    icon={<span>→</span>}
                                     iconPosition="right"
                                 >
                                     Continue
-                                </Button>
-                                <Button 
-                                    variant="tonal" 
-                                    icon={<span>🔗</span>} 
+                                </ShadButton>
+                                <ShadButton
+                                    variant="tonal"
+                                    icon={<span>🔗</span>}
                                     iconPosition="right"
                                 >
                                     Share
-                                </Button>
-                                <Button 
-                                    variant="outlined" 
-                                    icon={<span>🔄</span>} 
+                                </ShadButton>
+                                <ShadButton
+                                    variant="outline"
+                                    icon={<span>🔄</span>}
                                     iconPosition="right"
                                 >
                                     Refresh
-                                </Button>
+                                </ShadButton>
                             </div>
                         </div>
                     </div>
@@ -216,14 +216,14 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Full Width Buttons</h2>
                     <p className="text-gray-600 mb-6">Buttons that span the full container width</p>
-                    
+
                     <div className="space-y-3">
-                        <Button variant="filled" fullWidth>
+                        <ShadButton variant="filled" fullWidth>
                             Primary Full Width Action
-                        </Button>
-                        <Button variant="outlined" fullWidth>
+                        </ShadButton>
+                        <ShadButton variant="outline" fullWidth>
                             Secondary Full Width Action
-                        </Button>
+                        </ShadButton>
                     </div>
                 </div>
 
@@ -231,49 +231,49 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Click-Once Loading Buttons</h2>
                     <p className="text-gray-600 mb-6">Buttons that automatically show loading state after being clicked</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <h3 className="text-sm font-medium text-gray-700">Async Operation (Realistic)</h3>
                             <div className="space-y-3">
-                                <Button 
-                                    variant="filled" 
+                                <ShadButton
+                                    variant="filled"
                                     loading={isLoading}
                                     onClick={handleSubmit}
                                     disabled={isLoading}
                                     color="primary"
                                 >
                                     {isLoading ? 'Submitting...' : 'Submit Form'}
-                                </Button>
+                                </ShadButton>
                                 <p className="text-xs text-gray-500">
                                     Simulates API call with async/await and error handling
                                 </p>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <h3 className="text-sm font-medium text-gray-700">Quick Action</h3>
                             <div className="space-y-3">
-                                <Button 
-                                    variant="outlined" 
+                                <ShadButton
+                                    variant="outline"
                                     loading={isLoading}
                                     onClick={handleQuickAction}
                                     disabled={isLoading}
                                     color="success"
                                 >
                                     {isLoading ? 'Working...' : 'Quick Action'}
-                                </Button>
+                                </ShadButton>
                                 <p className="text-xs text-gray-500">
                                     Fast operation with immediate feedback
                                 </p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="mt-4 p-3 bg-green-50 rounded-md">
                         <p className="text-sm text-green-700">
-                            <strong>💡 Pattern:</strong> Use one <code className="bg-white px-1 rounded">isLoading</code> state 
-                            with <code className="bg-white px-1 rounded">loading={isLoading}</code> 
+                            <strong>💡 Pattern:</strong> Use one <code className="bg-white px-1 rounded">isLoading</code> state
+                            with <code className="bg-white px-1 rounded">loading={isLoading}</code>
                             and <code className="bg-white px-1 rounded">disabled={isLoading}</code> to prevent multiple clicks!
                         </p>
                     </div>
@@ -283,42 +283,42 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Interactive Examples</h2>
                     <p className="text-gray-600 mb-6">Buttons with different interaction behaviors</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <h3 className="text-sm font-medium text-gray-700">Click Actions</h3>
                             <div className="space-y-3">
-                                <Button 
-                                    variant="filled" 
+                                <ShadButton
+                                    variant="filled"
                                     onClick={() => alert('Filled button clicked!')}
                                 >
                                     Show Alert
-                                </Button>
-                                <Button 
-                                    variant="outlined" 
+                                </ShadButton>
+                                <ShadButton
+                                    variant="outline"
                                     onClick={() => console.log('Logged to console')}
                                 >
                                     Log to Console
-                                </Button>
+                                </ShadButton>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <h3 className="text-sm font-medium text-gray-700">Navigation</h3>
                             <div className="space-y-3">
-                                <Button 
-                                    variant="text" 
+                                <ShadButton
+                                    variant="text"
                                     to="/"
                                 >
                                     Go to Home
-                                </Button>
-                                <Button 
-                                    variant="elevated" 
+                                </ShadButton>
+                                <ShadButton
+                                    variant="elevated"
                                     href="https://material.io/design"
                                     target="_blank"
                                 >
                                     External Link
-                                </Button>
+                                </ShadButton>
                             </div>
                         </div>
                     </div>
@@ -328,42 +328,42 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Custom Color Variants</h2>
                     <p className="text-gray-600 mb-6">Semantic color variations for different contexts</p>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center">
-                            <Button 
-                                variant="filled" 
+                            <ShadButton
+                                variant="filled"
                                 className="bg-red-600 hover:bg-red-700 focus:ring-red-500"
                             >
                                 Error
-                            </Button>
+                            </ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Destructive actions</p>
                         </div>
                         <div className="text-center">
-                            <Button 
-                                variant="filled" 
+                            <ShadButton
+                                variant="filled"
                                 className="bg-green-600 hover:bg-green-700 focus:ring-green-500"
                             >
                                 Success
-                            </Button>
+                            </ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Positive actions</p>
                         </div>
                         <div className="text-center">
-                            <Button 
-                                variant="filled" 
+                            <ShadButton
+                                variant="filled"
                                 className="bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500"
                             >
                                 Warning
-                            </Button>
+                            </ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Caution actions</p>
                         </div>
                         <div className="text-center">
-                            <Button 
-                                variant="filled" 
+                            <ShadButton
+                                variant="filled"
                                 className="bg-gray-600 hover:bg-gray-700 focus:ring-gray-500"
                             >
                                 Neutral
-                            </Button>
+                            </ShadButton>
                             <p className="text-xs text-gray-500 mt-2">Neutral actions</p>
                         </div>
                     </div>
@@ -400,7 +400,7 @@ const Buttons: React.FC = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4 text-gray-800">Simple Configuration</h2>
                     <p className="text-gray-600 mb-6">Easy button customization with minimal setup</p>
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
                             <h3 className="font-medium text-gray-700 mb-3">Button Props:</h3>

@@ -1,8 +1,6 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
-import Button from '@/components/Elements/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
-import ButtonLink from '@/components/Elements/ButtonLink';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { TextInput } from '@/components/Elements/TextInput';
@@ -10,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { SelectInput } from '@/components/Elements/SelectInput';
 import ToggleButton from '@/components/Elements/ToggleButton';
 import es from '@/services/expressService';
+import { Button as ShadButton } from '@/components/ui/button';
 
 export default function ExpressPass() {
   const {
@@ -79,7 +78,7 @@ export default function ExpressPass() {
   const onSubmit = (data: FormData) => {
     let fumbleReturn = isFumble ? Number(data.fumbleReturnZones) : null
 
-    let { gameAfterPlay, log } = es.processPass(game, Number(data.zones), fumbleReturn, offenseTeam, defenseTeam);
+    let { gameAfterPlay, log } = es.processPass(game, Number(data.zones), fumbleReturn, offenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
     logPlayMutation.mutate(log);
     navigate(gameUrl());
@@ -103,13 +102,13 @@ export default function ExpressPass() {
         <div className="text-center mt-2">
 
           <div className="flex justify-center mt-4 gap-2">
-            <Button onClick={() => setResult("CMP")} variant={result == "CMP" ? "filled" : "outlined"} className="w-24">CMP</Button>
-            <Button onClick={() => setResult("INC")} variant={result == "INC" ? "filled" : "outlined"} className="w-24">INC</Button>
-            <Button onClick={() => setResult("INT")} variant={result == "INT" ? "filled" : "outlined"} className="w-24">INT</Button>
-            <Button onClick={() => setResult("SACK")} variant={result == "SACK" ? "filled" : "outlined"} className="w-24">SACK</Button>
+            <ShadButton onClick={() => setResult("CMP")} variant={result == "CMP" ? "default" : "outline"} className="w-24">CMP</ShadButton>
+            <ShadButton onClick={() => setResult("INC")} variant={result == "INC" ? "default" : "outline"} className="w-24">INC</ShadButton>
+            <ShadButton onClick={() => setResult("INT")} variant={result == "INT" ? "default" : "outline"} className="w-24">INT</ShadButton>
+            <ShadButton onClick={() => setResult("SACK")} variant={result == "SACK" ? "default" : "outline"} className="w-24">SACK</ShadButton>
           </div>
 
-          {!result && <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>}
+          {!result && <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>}
 
           {result == "CMP" && <>
             <section>
@@ -153,8 +152,8 @@ export default function ExpressPass() {
                 }
 
                 <div className="flex justify-center mt-4 gap-2 mb-4">
-                  <Button type="submit" color="info">Confirm CMP</Button>
-                  <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                  <ShadButton type="submit" variant="info">Confirm CMP</ShadButton>
+                  <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>
                 </div>
               </form>
             </section>
@@ -162,8 +161,8 @@ export default function ExpressPass() {
 
           {result == "INC" &&
             <div className="flex justify-center mt-4 gap-2 mb-4">
-              <Button onClick={handleIncomplete} color="info">Confirm INC</Button>
-              <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+              <ShadButton onClick={handleIncomplete} variant="info">Confirm INC</ShadButton>
+              <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>
             </div>
           }
 
@@ -195,8 +194,8 @@ export default function ExpressPass() {
                     }}
                   />
                   <div className="flex justify-center mt-4 gap-2 mb-4">
-                    <Button type="submit" color="info">Confirm INT</Button>
-                    <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                    <ShadButton type="submit" variant="info">Confirm INT</ShadButton>
+                    <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>
                   </div>
                 </form>
               </section>
@@ -244,14 +243,14 @@ export default function ExpressPass() {
                 </div>
 
                 <div className="flex gap-2 justify-center">
-                  <Button
+                  <ShadButton
                     type="submit"
-                    color="info"
+                    variant="info"
                   >
                     Confirm SACK
-                  </Button>
+                  </ShadButton>
 
-                  <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+                  <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>
                 </div>
               </form>
             </>

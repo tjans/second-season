@@ -5,7 +5,7 @@ import * as ReactDOM from "react-dom/client";
 import Layout from "@/pages/Layout";
 
 // Pages
-import Login from "./pages/Login";
+//import Login from "./pages/Login";
 import Logout from "@/pages/Logout";
 import Home from "@/pages/Home";
 import Members from "@/pages/Members";
@@ -14,17 +14,17 @@ import ControlPanel from "@/pages/ControlPanel";
 import Unauthorized from "@/pages/Unauthorized";
 import PageNotFound from "@/pages/PageNotFound";
 
-import ButtonDemo from "@/pages/Styles/Buttons";
-import Links from "@/pages/Styles/Links";
-import TextInputStyles from "@/pages/Styles/TextInputs";
-import SelectInputStyles from "@/pages/Styles/SelectInputs";
-import ColorTest from "@/pages/ColorTest";
-import FormStyles from "./pages/Styles/Forms";
+// import ButtonDemo from "@/pages/Styles/Buttons";
+// import Links from "@/pages/Styles/Links";
+// import TextInputStyles from "@/pages/Styles/TextInputs";
+// import SelectInputStyles from "@/pages/Styles/SelectInputs";
+// import ColorTest from "@/pages/ColorTest";
+// import FormStyles from "./pages/Styles/Forms";
 
 import {
   QueryClient,
   QueryClientProvider,
-} from '@tanstack/react-query' 
+} from '@tanstack/react-query'
 
 // Plumbing
 import ErrorPage from "@/error-page";
@@ -37,6 +37,7 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
+
 import ExpressGame from "./pages/Express/ExpressGame";
 import ExpressKickoff from "./pages/Express/ExpressKickoff";
 import ExpressPass from "./pages/Express/ExpressPass";
@@ -52,8 +53,8 @@ const router = createBrowserRouter(
 
       <Route path="/" element={<Layout />} errorElement={<ErrorPage />}>
         <Route index element={<Home />} />
-        
-        <Route path="/express/game/:gameId" element={<ExpressGame  />} />
+
+        <Route path="/express/game/:gameId" element={<ExpressGame />} />
         <Route path="/express/game/:gameId/kickoff" element={<ExpressKickoff />} />
         <Route path="/express/game/:gameId/pass" element={<ExpressPass />} />
         <Route path="/express/game/:gameId/run" element={<ExpressRun />} />
@@ -64,21 +65,21 @@ const router = createBrowserRouter(
 
         <Route path="/members" element={<Members />} />
 
-        <Route path="/login" element={<Login />} />
+        {/* <Route path="/login" element={<Login />} /> */}
         <Route path="/logout" element={<Logout />} />
 
-        <Route path="/styles/buttons" element={<ButtonDemo />} />
+        {/* <Route path="/styles/buttons" element={<ButtonDemo />} />
         <Route path="/styles/links" element={<Links />} />
         <Route path="/styles/textinputs" element={<TextInputStyles />} />
         <Route path="/styles/selectinputs" element={<SelectInputStyles />} />
         <Route path="/styles/colors" element={<ColorTest />} />
-        <Route path="/styles/forms" element={<FormStyles />} />
+        <Route path="/styles/forms" element={<FormStyles />} /> */}
 
         <Route element={<RequireAuth />}>
           <Route path="/profile" element={<Profile />} />
         </Route>
 
-        
+
 
         <Route element={<RequireAuth allowedRoles={['Admin']} />}>
           <Route path="/control-panel" element={<ControlPanel />} />
@@ -95,8 +96,8 @@ const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-    
-        <RouterProvider router={router} />
+
+      <RouterProvider router={router} />
 
     </QueryClientProvider>
   </React.StrictMode>,

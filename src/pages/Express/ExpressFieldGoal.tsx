@@ -1,8 +1,7 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
-import Button from '@/components/Elements/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
-import ButtonLink from '@/components/Elements/ButtonLink';
+import { Button as ShadButton } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import es from '@/services/expressService';
 
@@ -31,9 +30,9 @@ export default function ExpressRun() {
 
           <section>
             <div className="flex justify-center mt-4 gap-2 mb-4">
-              <Button onClick={() => handleFGA(true)} color="info">FG Good</Button>
-              <Button onClick={() => handleFGA(false)} color="info">FG Missed</Button>
-              <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
+              <ShadButton onClick={() => handleFGA(true)} variant="info">FG Good</ShadButton>
+              <ShadButton onClick={() => handleFGA(false)} variant="info">FG Missed</ShadButton>
+              <ShadButton to={gameUrl()} variant="secondary" className="">Cancel</ShadButton>
             </div>
           </section>
 
