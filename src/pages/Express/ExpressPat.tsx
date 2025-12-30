@@ -42,8 +42,8 @@ export default function ExpressPat() {
         </div>
 
         <div className="flex justify-center mt-4 gap-2 mb-4">
-          <Button onClick={() => setResult("PAT")} variant={result == "PAT" ? "filled" : "outlined"} className="w-24">PAT</Button>
-          <Button onClick={() => setResult("2PT")} variant={result == "2PT" ? "filled" : "outlined"} className="w-24">2-pt</Button>
+          <Button onClick={() => setResult("PAT")} variant={result == "PAT" ? "default" : "outline"} className="w-24">PAT</Button>
+          <Button onClick={() => setResult("2PT")} variant={result == "2PT" ? "default" : "outline"} className="w-24">2-pt</Button>
           <ButtonLink to={gameUrl()} color="secondary" className="">Cancel</ButtonLink>
         </div>
 

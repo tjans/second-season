@@ -48,7 +48,7 @@ export default function ExpressKickoff() {
         <div className="text-center">
           <div className="my-4 font-bold">or</div>
           <Button color="error" onClick={() => handleFumble()}>Zone 2 + Fumble</Button>
-          <ButtonLink to={gameUrl()} color="secondary" className="ml-2">Cancel</ButtonLink>
+          <Button variant="ghost" onClick={() => navigate(gameUrl())} className="ml-2">Cancel</Button>
         </div>
       </ContentWrapper>
     </>

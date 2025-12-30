@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import es from '@/services/expressService';
 
 export default function ExpressRun() {
-  const { offenseTeam, defenseTeam, game, homeTeam, gameUrl, situation, saveGameMutation, logPlayMutation, getReverseZone } = useExpressGameTools();
+  const { offenseTeam, defenseTeam, game, homeTeam, gameUrl, situation, saveGameMutation, logPlayMutation } = useExpressGameTools();
 
   const navigate = useNavigate();
   usePageTitle("Express Field Goal Attempt");

@@ -15,7 +15,7 @@ export default function ExpressPass() {
     offenseTeam, defenseTeam,
     gameUrl,
     game, saveGameMutation, logPlayMutation, situation,
-    isFumble, setIsFumble } = useExpressGameTools();
+    isFumble, setIsFumble, saveTeamStatMutation } = useExpressGameTools();
 
   const [result, setResult] = useState<"CMP" | "INC" | "INT" | "SACK" | null>("CMP");
 
@@ -75,12 +75,19 @@ export default function ExpressPass() {
   }
 
   // Handle fumbles
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     let fumbleReturn = isFumble ? Number(data.fumbleReturnZones) : null
 
-    let { gameAfterPlay, log } = es.processPass(game, Number(data.zones), fumbleReturn, offenseTeam);
+    let { gameAfterPlay, log, stats } = es.processPass(game, Number(data.zones), fumbleReturn, offenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
-    logPlayMutation.mutate(log);
+
+    const logId = await logPlayMutation.mutateAsync(log);
+    saveGameMutation.mutate(gameAfterPlay);
+
+    // Save the stat lines
+    stats.forEach(statLine => saveTeamStatMutation.mutate({ ...statLine, logId }));
+
+
     navigate(gameUrl());
   }
 

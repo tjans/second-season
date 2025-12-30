@@ -35,8 +35,13 @@ export default {
 
         // Tally the yardage gained
         let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
-        let rushYardsGained = 0;
         let passYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
+
+        let passingStat: ExpressTeamStat = {
+            gameId: game.gameId,
+            teamId: offenseTeam.teamId,
+            passYardsGained
+        }
 
         if (fumbleReturnZones !== null) {
             this.swapPossession(gameAfterPlay);
@@ -44,7 +49,13 @@ export default {
             this.setRelativeZone(gameAfterPlay, fumbleReturnZones);
             let scoreResult = this.checkForScore(gameAfterPlay);
             isTouchdown = scoreResult === "TOUCHDOWN";
+
+            passingStat.fumble = 1;
+            if (isTouchdown) passingStat.fumbleTD = 1;
+
         } else {
+            if (isTouchdown) passingStat.passTD = 1;
+
             // If it's a safety, we need to swap possession back
             if (isSafety) this.swapPossession(gameAfterPlay);
         }
@@ -73,13 +84,12 @@ export default {
             situation: gameAfterPlay.situation,
             message,
             passYardsGained: passYardsGained,
-            rushYardsGained: rushYardsGained,
             TD: isTouchdown ? 1 : 0,
             Safeties: isSafety ? 1 : 0,
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [passingStat] };
     },
 
     processRun: function (game: ExpressGame, zones: number, fumbleReturnZones: number | null, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
@@ -102,7 +112,6 @@ export default {
 
         // Tally the yardage gained
         let actualDelta = (gameAfterPlay.situation.currentZone ?? 0) - (gameBeforePlay.situation.currentZone ?? 0);
-        let passYardsGained = 0;
         let rushYardsGained = this.calculateYardage(gameBeforePlay.situation.currentZone ?? 0, actualDelta);
 
         let rushingStat: ExpressTeamStat = {
@@ -155,7 +164,6 @@ export default {
             situation: gameAfterPlay.situation,
             message,
 
-            passYardsGained: passYardsGained,
             rushYardsGained: rushYardsGained,
             offenseTeamId: offenseTeam.teamId,
             defenseTeamId: defenseTeam.teamId,
@@ -199,7 +207,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     processSack: function (game: ExpressGame, zonesLost: number, fumbleReturnZones: number | null, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
@@ -257,7 +265,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
 
     },
 
@@ -295,7 +303,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     processIncomplete: function (game: ExpressGame, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
@@ -316,7 +324,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     processPAT: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
@@ -347,7 +355,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     process2PT: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
@@ -378,7 +386,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     processFieldGoal: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
@@ -416,7 +424,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     processPunt: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
@@ -451,7 +459,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log };
+        return { gameAfterPlay, log, stats: [] };
     },
 
     /**************************************************************************************************************************

@@ -168,10 +168,8 @@
   --color-info: #0EA5E9;
   --color-info-fg: #FFFFFF;
 
-  --color-soft: '#757575',
-    --color-lightGray: '#CECECE',
+  --color-soft: #757575;
+  --color-light: #CECECE;
 }
 
-@layer base {
-  * {}
-}
+@layer base {}
