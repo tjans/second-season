@@ -1,3 +1,9 @@
+export const SHADCOLORS = {
+  warning: "yellow-400",
+}
+
+
+
 // =============================================================================
 // THEME CONFIGURATION
 // =============================================================================
@@ -31,7 +37,7 @@ export const HOVER_COLORS = {
   [COLORS.error]: "red-700",         // red-600 → red-700
   [COLORS.warning]: "yellow-400",    // yellow-300 → yellow-400
   [COLORS.info]: "sky-600",          // sky-500 → sky-600
-  
+
   // Additional common colors for overrideClasses usage
   "purple-500": "purple-600",
   "orange-500": "orange-600",
@@ -77,13 +83,13 @@ export const getHoverColor = (baseColor: string): string => {
   if (baseColor in HOVER_COLORS) {
     return HOVER_COLORS[baseColor as keyof typeof HOVER_COLORS];
   }
-  
+
   // Extract color name and number from classes like "blue-600", etc.
   const colorMatch = baseColor.match(/([a-z]+)-(\d+)/);
   if (colorMatch) {
     const [, colorName, colorNumber] = colorMatch;
     const num = parseInt(colorNumber);
-    
+
     // For light colors (100-400), go darker by 100
     // For medium colors (500-600), go darker by 100  
     // For dark colors (700-900), stay same or go lighter
@@ -95,7 +101,7 @@ export const getHoverColor = (baseColor: string): string => {
       return `${colorName}-${Math.max(num - 100, 500)}`;
     }
   }
-  
+
   // Fallback: return the original color
   return baseColor;
 };

@@ -6,19 +6,11 @@ module.exports = {
   darkMode: 'class',
   content: [
     "./index.html",
-    "./@/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        transparent: 'transparent',
-        midnight: '#343c4d',
-        soot: '#212121',
-        soft: '#757575',
-        lightGray: '#CECECE',
-
-        'btn-primary': '#508DC8',
-        'btn-primary-shadow': '#4070a0',
       },
       keyframes: {
         'fade-in': {

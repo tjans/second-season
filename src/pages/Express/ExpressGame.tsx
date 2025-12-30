@@ -9,6 +9,7 @@ import usePageTitle from '@/hooks/usePageTitle'
 
 // components
 import ContentWrapper from "@/components/ContentWrapper";
+import { Button as ShadButton } from "@/components/ui/button"
 
 // queries
 import { usePlayLogs } from '@/queries/playLogQueries';
@@ -246,21 +247,20 @@ export default function ExpressGame() {
         {game.situation.mode == "DRIVE" &&
           <>
             <div className="mb-4 flex justify-center items-center">
-              <ButtonLink to={gameUrl("pass")} className="mr-2 mb-2">
+              <ShadButton to={gameUrl("pass")} className="mr-2 mb-2">
                 Pass
-              </ButtonLink>
+              </ShadButton>
 
-              <ButtonLink to={gameUrl("run")} className="mr-2 mb-2">
+              <ShadButton to={gameUrl("run")} className="mr-2 mb-2">
                 Run
-              </ButtonLink>
-
-              <ButtonLink to={gameUrl("fg")} className="mr-2 mb-2">
+              </ShadButton>
+              <ShadButton to={gameUrl("fg")} className="mr-2 mb-2">
                 FG
-              </ButtonLink>
+              </ShadButton>
 
-              <ButtonLink to={gameUrl("punt")} className="mr-2 mb-2">
+              <ShadButton to={gameUrl("punt")} className="mr-2 mb-2">
                 Punt
-              </ButtonLink>
+              </ShadButton>
             </div>
 
             <div className="mb-4 flex justify-center items-center">
