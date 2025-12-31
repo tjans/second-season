@@ -40,7 +40,9 @@ export default {
         let passingStat: ExpressTeamStat = {
             gameId: game.gameId,
             teamId: offenseTeam.teamId,
-            passYardsGained
+            passYardsGained,
+            interception: 0,
+            completion: 1
         }
 
         if (fumbleReturnZones !== null) {
@@ -181,6 +183,12 @@ export default {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let gameAfterPlay = structuredClone(game);
 
+        let passingStat: ExpressTeamStat = {
+            gameId: game.gameId,
+            teamId: offenseTeam.teamId,
+            interception: 1
+        }
+
         this.advanceClock(gameAfterPlay);
         this.swapPossession(gameAfterPlay);
 
@@ -207,13 +215,19 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
 
-        return { gameAfterPlay, log, stats: [] };
+        return { gameAfterPlay, log, stats: [passingStat] };
     },
 
     processSack: function (game: ExpressGame, zonesLost: number, fumbleReturnZones: number | null, offenseTeam: Team, defenseTeam: Team): ProcessPlayResult {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         let gameAfterPlay = structuredClone(game);
         if (!gameAfterPlay.situation.currentZone) throw new Error("You cannot sack when the currentZone is not set");
+
+        let stats: ExpressTeamStat = {
+            gameId: game.gameId,
+            teamId: defenseTeam.teamId,
+            sack: 1
+        }
 
         let passYardsLost = zonesLost * 7; // sacks are a flat 7 yards per zone lost
 
@@ -265,7 +279,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         }
 
-        return { gameAfterPlay, log, stats: [] };
+        return { gameAfterPlay, log, stats: [stats] };
 
     },
 

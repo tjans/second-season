@@ -63,14 +63,18 @@ export default function ExpressPass() {
     navigate(gameUrl());
   }
 
-  const onSackSubmit = ({ isLoss, fumbleReturnZones, isFumble }: SackFormData) => {
+  const onSackSubmit = async ({ isLoss, fumbleReturnZones, isFumble }: SackFormData) => {
     let lossZones = isLoss ? -1 : 0;
     let fumbleReturn = isFumble ? Number(fumbleReturnZones) : null;
 
-    let { gameAfterPlay, log } = es.processSack(game, lossZones, fumbleReturn, offenseTeam, defenseTeam);
+    let { gameAfterPlay, log, stats } = es.processSack(game, lossZones, fumbleReturn, offenseTeam, defenseTeam);
 
     saveGameMutation.mutate(gameAfterPlay);
-    logPlayMutation.mutate(log);
+    const logId = await logPlayMutation.mutateAsync(log);
+
+    // Save the stat lines
+    stats.forEach(statLine => saveTeamStatMutation.mutate({ ...statLine, logId }));
+
     navigate(gameUrl());
   }
 
@@ -91,10 +95,16 @@ export default function ExpressPass() {
     navigate(gameUrl());
   }
 
-  const onIntSubmit = (data: IntFormData) => {
-    let { gameAfterPlay, log } = es.processInterception(game, Number(data.interceptionZone), offenseTeam, defenseTeam);
+  const onIntSubmit = async (data: IntFormData) => {
+    let { gameAfterPlay, log, stats } = es.processInterception(game, Number(data.interceptionZone), offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
-    logPlayMutation.mutate(log);
+    const logId = await logPlayMutation.mutateAsync(log);
+
+    console.log(stats);
+
+    // Save the stat lines
+    stats.forEach(statLine => saveTeamStatMutation.mutate({ ...statLine, logId }));
+
     navigate(gameUrl());
   }
 

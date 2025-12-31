@@ -25,14 +25,40 @@ export default function ExpressStats() {
   }
 
   const getPassingStats = (teamStats: ExpressTeamStat[]) => {
-    if (!teamStats || !teamStats) return { totalPassYards: 0, totalPassTD: 0 };
+    if (!teamStats || !teamStats) return {
+      totalPassYards: 0,
+      totalPassTD: 0,
+      totalInterceptions: 0,
+      totalCompletions: 0
+    };
 
     return teamStats.reduce((totals, statLine: ExpressTeamStat) => {
       return {
         totalPassYards: totals.totalPassYards + (statLine.passYardsGained || 0),
-        totalPassTD: totals.totalPassTD + (statLine.passTD || 0)
+        totalPassTD: totals.totalPassTD + (statLine.passTD || 0),
+        totalInterceptions: totals.totalInterceptions + (statLine.interception || 0),
+        totalCompletions: totals.totalCompletions + (statLine.completion || 0)
       };
-    }, { totalPassYards: 0, totalPassTD: 0 });
+    }, { // defaults
+      totalPassYards: 0,
+      totalPassTD: 0,
+      totalInterceptions: 0,
+      totalCompletions: 0
+    })
+  }
+
+  const getDefenseStats = (teamStats: ExpressTeamStat[]) => {
+    if (!teamStats || !teamStats) return {
+      totalSacks: 0
+    };
+
+    return teamStats.reduce((totals, statLine: ExpressTeamStat) => {
+      return {
+        totalSacks: totals.totalSacks + (statLine.sack || 0)
+      };
+    }, { // defaults
+      totalSacks: 0
+    })
   }
 
   usePageTitle("Express Stats");
@@ -43,6 +69,9 @@ export default function ExpressStats() {
   const homePassingStats = useMemo(() => getPassingStats(homeTeamStats.data), [homeTeamStats.data]);
   const awayPassingStats = useMemo(() => getPassingStats(awayTeamStats.data), [awayTeamStats.data]);
 
+  const homeDefenseStats = useMemo(() => getDefenseStats(homeTeamStats.data), [homeTeamStats.data]);
+  const awayDefenseStats = useMemo(() => getDefenseStats(awayTeamStats.data), [awayTeamStats.data]);
+
   return (
     <>
       <ContentWrapper>
@@ -52,8 +81,11 @@ export default function ExpressStats() {
             <div className="text-lg font-semibold">{homeTeam.city} Stats</div>
             <div>Rushing Yards: {homeRushingStats.totalRushYards}</div>
             <div>Rushing Touchdowns: {homeRushingStats.totalRushTD}</div>
+            <div>Completions: {homePassingStats.totalCompletions}</div>
             <div>Passing Yards: {homePassingStats.totalPassYards}</div>
             <div>Passing Touchdowns: {homePassingStats.totalPassTD}</div>
+            <div>Interceptions: {homePassingStats.totalInterceptions}</div>
+            <div>Defensive Sacks: {homeDefenseStats.totalSacks}</div>
           </div>
         }
 
@@ -64,6 +96,8 @@ export default function ExpressStats() {
             <div>Rushing Touchdowns: {awayRushingStats.totalRushTD}</div>
             <div>Passing Yards: {awayPassingStats.totalPassYards}</div>
             <div>Passing Touchdowns: {awayPassingStats.totalPassTD}</div>
+            <div>Interceptions: {awayPassingStats.totalInterceptions}</div>
+            <div>Defensive Sacks: {awayDefenseStats.totalSacks}</div>
           </div>
         }
 

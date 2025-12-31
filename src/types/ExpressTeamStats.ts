@@ -20,6 +20,8 @@ export type ExpressTeamStat = {
     FGA?: number;
     XPM?: number;
     XPA?: number;
+    sack?: number;
+    completion?: number;
 
     twoPointConversion?: number;
     fumble?: number;
