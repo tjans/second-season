@@ -10,7 +10,7 @@ import { useState } from 'react';
 import es from '@/services/expressService';
 
 export default function ExpressPat() {
-  const { game, offenseTeam, defenseTeam, homeTeam, gameUrl } = useExpressGameTools();
+  const { game, offenseTeam, defenseTeam, saveTeamStatMutation, gameUrl } = useExpressGameTools();
   const [result, setResult] = useState<"PAT" | "2PT" | null>(null);
 
   const navigate = useNavigate();
@@ -19,10 +19,14 @@ export default function ExpressPat() {
   const saveGameMutation = useSaveGame();
   const logPlayMutation = useLogPlay();
 
-  const handlePAT = (isMade: boolean) => {
-    let { gameAfterPlay, log } = es.processPAT(game, isMade, offenseTeam, defenseTeam);
+  const handlePAT = async (isMade: boolean) => {
+    let { gameAfterPlay, log, stats } = es.processPAT(game, isMade, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
-    logPlayMutation.mutate(log);
+
+    const logId = await logPlayMutation.mutateAsync(log);
+
+    // Save the stat lines
+    stats.forEach(statLine => saveTeamStatMutation.mutate({ ...statLine, logId }));
     navigate(gameUrl());
   }
 

@@ -61,6 +61,29 @@ export default function ExpressStats() {
     })
   }
 
+  const getKickingStats = (teamStats: ExpressTeamStat[]) => {
+    if (!teamStats || !teamStats) return {
+      totalFGM: 0,
+      totalFGA: 0,
+      totalXPM: 0,
+      totalXPA: 0
+    };
+
+    return teamStats.reduce((totals, statLine: ExpressTeamStat) => {
+      return {
+        totalFGM: totals.totalFGM + (statLine.FGM || 0),
+        totalFGA: totals.totalFGA + (statLine.FGA || 0),
+        totalXPM: totals.totalXPM + (statLine.XPM || 0),
+        totalXPA: totals.totalXPA + (statLine.XPA || 0)
+      };
+    }, { // defaults
+      totalFGM: 0,
+      totalFGA: 0,
+      totalXPM: 0,
+      totalXPA: 0
+    })
+  }
+
   usePageTitle("Express Stats");
 
   const homeRushingStats = useMemo(() => getRushingStats(homeTeamStats.data), [homeTeamStats.data]);
@@ -71,6 +94,9 @@ export default function ExpressStats() {
 
   const homeDefenseStats = useMemo(() => getDefenseStats(homeTeamStats.data), [homeTeamStats.data]);
   const awayDefenseStats = useMemo(() => getDefenseStats(awayTeamStats.data), [awayTeamStats.data]);
+
+  const awayKickingStats = useMemo(() => getKickingStats(awayTeamStats.data), [awayTeamStats.data]);
+  const homeKickingStats = useMemo(() => getKickingStats(homeTeamStats.data), [homeTeamStats.data]);
 
   return (
     <>
@@ -86,6 +112,8 @@ export default function ExpressStats() {
             <div>Passing Touchdowns: {homePassingStats.totalPassTD}</div>
             <div>Interceptions: {homePassingStats.totalInterceptions}</div>
             <div>Defensive Sacks: {homeDefenseStats.totalSacks}</div>
+            <div>PAT: {homeKickingStats.totalXPM} / {homeKickingStats.totalXPA}</div>
+            <div>FG: {homeKickingStats.totalFGM} / {homeKickingStats.totalFGA}</div>
           </div>
         }
 
@@ -98,6 +126,8 @@ export default function ExpressStats() {
             <div>Passing Touchdowns: {awayPassingStats.totalPassTD}</div>
             <div>Interceptions: {awayPassingStats.totalInterceptions}</div>
             <div>Defensive Sacks: {awayDefenseStats.totalSacks}</div>
+            <div>PAT: {awayKickingStats.totalXPM} / {awayKickingStats.totalXPA}</div>
+            <div>FG: {awayKickingStats.totalFGM} / {awayKickingStats.totalFGA}</div>
           </div>
         }
 

@@ -345,6 +345,13 @@ export default {
         let gameAfterPlay = structuredClone(game);
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
 
+        let stats: ExpressTeamStat = {
+            gameId: game.gameId,
+            teamId: offenseTeamBeforePlay.teamId,
+            XPA: 1,
+            XPM: isMade ? 1 : 0
+        }
+
         gameAfterPlay.situation.currentZone = null;
         gameAfterPlay.situation.mode = "KICKOFF";
 
@@ -369,7 +376,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log, stats: [] };
+        return { gameAfterPlay, log, stats: [stats] };
     },
 
     process2PT: function (game: ExpressGame, isMade: boolean, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {
@@ -408,6 +415,14 @@ export default {
         let gameBeforePlay = structuredClone(game); // for calculating the delta of zones moved, and other things
         if (!gameBeforePlay.situation.currentZone) throw new Error("Current zone is required to process a field goal");
 
+        let stats: ExpressTeamStat = {
+            gameId: game.gameId,
+            teamId: offenseTeamBeforePlay.teamId,
+            FGA: 1,
+            FGM: isMade ? 1 : 0
+        }
+
+
         gameAfterPlay.situation.currentZone = null;
         gameAfterPlay.situation.mode = "KICKOFF";
 
@@ -438,7 +453,7 @@ export default {
             playMinute: gameBeforePlay.situation.minute // store this for the log to indicate what time the play happened
         };
 
-        return { gameAfterPlay, log, stats: [] };
+        return { gameAfterPlay, log, stats: [stats] };
     },
 
     processPunt: function (game: ExpressGame, finalZone: number, offenseTeamBeforePlay: Team, defenseTeamBeforePlay: Team): ProcessPlayResult {

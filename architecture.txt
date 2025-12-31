@@ -1,16 +1,10 @@
 Add stats along with the log
-    passing/rushing fumble
-    
-    sack fumble for TD
-
-    kick return TD
-    kick return fumble
-
-    punt return fumble
-    punt return TD
-
+       
     field goal made/missed
-
+    XP made or missed
+    defensive TD
+    kick return TD
+    punt return TD
     punt
 
 

@@ -6,15 +6,20 @@ import { useNavigate } from 'react-router-dom';
 import es from '@/services/expressService';
 
 export default function ExpressRun() {
-  const { offenseTeam, defenseTeam, game, homeTeam, gameUrl, situation, saveGameMutation, logPlayMutation } = useExpressGameTools();
+  const { offenseTeam, defenseTeam, game, saveTeamStatMutation, gameUrl, situation, saveGameMutation, logPlayMutation } = useExpressGameTools();
 
   const navigate = useNavigate();
   usePageTitle("Express Field Goal Attempt");
 
-  const handleFGA = (isMade: boolean) => {
-    let { gameAfterPlay, log } = es.processFieldGoal(game, isMade, offenseTeam, defenseTeam);
+  const handleFGA = async (isMade: boolean) => {
+    let { gameAfterPlay, log, stats } = es.processFieldGoal(game, isMade, offenseTeam, defenseTeam);
     saveGameMutation.mutate(gameAfterPlay);
-    logPlayMutation.mutate(log);
+
+    const logId = await logPlayMutation.mutateAsync(log);
+
+    // Save the stat lines
+    stats.forEach(statLine => saveTeamStatMutation.mutate({ ...statLine, logId }));
+
     navigate(gameUrl());
   }
 
