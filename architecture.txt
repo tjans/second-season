@@ -1,7 +1,5 @@
 Add stats along with the log
-       
-    field goal made/missed
-    XP made or missed
+    sack
     defensive TD
     kick return TD
     punt return TD

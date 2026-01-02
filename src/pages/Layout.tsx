@@ -5,10 +5,8 @@ import { APP_NAME, getHeaderStyles } from "@/config/app";
 import Loading from "@/components/Loading";
 
 // Icons
-import { FaKey, FaSignOutAlt, FaHome } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
 import { IoPeople } from "react-icons/io5";
-import { AiFillControl } from "react-icons/ai";
-import { MdAccountCircle } from "react-icons/md";
 
 
 
@@ -39,7 +37,7 @@ export default function Layout() {
         <Loading />
       ) : (
         <>
-          <div 
+          <div
             className="flex items-center justify-center gap-3 p-4 font-bold text-center"
             style={getHeaderStyles()}
           >
@@ -63,9 +61,9 @@ export default function Layout() {
           </div>
 
           <div className="h-screen mx-auto text-center">
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <Outlet context={[setPageTitle]} />
-          </React.Suspense>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <Outlet context={[setPageTitle]} />
+            </React.Suspense>
           </div>
 
           <div className="fixed bottom-0 left-0 w-full bg-gray-100 border-t border-gray-300">

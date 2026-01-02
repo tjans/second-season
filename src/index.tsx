@@ -47,6 +47,8 @@ import ExpressPunt from "./pages/Express/ExpressPunt";
 import ExpressPat from "./pages/Express/ExpressPat";
 import ExpressStats from "./pages/Express/ExpressStats";
 
+import TeamsHome from "./pages/Teams/TeamHome";
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
@@ -62,6 +64,8 @@ const router = createBrowserRouter(
         <Route path="/express/game/:gameId/punt" element={<ExpressPunt />} />
         <Route path="/express/game/:gameId/pat" element={<ExpressPat />} />
         <Route path="/express/game/:gameId/stats" element={<ExpressStats />} />
+
+        <Route path="/teams" element={<TeamsHome />} />
 
         <Route path="/members" element={<Members />} />
 

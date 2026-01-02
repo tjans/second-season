@@ -2,16 +2,15 @@ import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import ButtonLink from '@/components/Elements/ButtonLink';
-import { useNavigate } from 'react-router-dom';
 
 export default function ExpressStats() {
-  const {gameUrl} = useExpressGameTools();
-  
+  const { gameUrl } = useExpressGameTools();
+
   usePageTitle("Express Stats");
-  
+
   return (
     <>
-      <ContentWrapper>        
+      <ContentWrapper>
         <div className="text-center">
           Stats coming soon!
           <ButtonLink to={gameUrl()} color="secondary" className="ml-2">Cancel</ButtonLink>

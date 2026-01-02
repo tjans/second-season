@@ -11,12 +11,13 @@ import { db } from '@/db';
 export default function Home() {
 
   useEffect(() => {
-     const foo = async () => {
+    const foo = async () => {
       // this is here to force a query to open the DB
       let test = await db.expressGames.where("gameId").equals("foo").toArray();
-     }
+      console.log("test", test);
+    }
 
-     foo();
+    foo();
   }, []);
 
   usePageTitle("Home");
@@ -24,7 +25,8 @@ export default function Home() {
   return (
     <>
       <ContentWrapper>
-        <Link to={"/express/game/game-id-1"}>View Express Game</Link>
+        <Link to={"/express/game/game-id-1"}>View Express Game</Link><br />
+        <Link to={"/teams"}>Teams</Link>
 
       </ContentWrapper>
 
