@@ -1,6 +1,6 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import ButtonLink from '@/components/Elements/ButtonLink';
 import { useLogPlay } from '@/queries/playLogQueries';

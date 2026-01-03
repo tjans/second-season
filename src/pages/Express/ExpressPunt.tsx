@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { SelectInput } from '@/components/Elements/SelectInput';
 import es from '@/services/expressService';
-import { Button as ShadButton } from '@/components/ui/button';
+import { Button as ShadButton } from '@/components/ui/Button';
 
 export default function ExpressPunt() {
   const { game, defenseTeam, saveGameMutation, logPlayMutation, offenseTeam, gameUrl, situation } = useExpressGameTools();

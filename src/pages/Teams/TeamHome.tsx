@@ -1,5 +1,5 @@
 import { useAllTeams } from "@/queries/teamQueries";
-import FloatingAddButton from "@/components/ui/floatingAddButton";
+import FloatingAddButton from "@/components/ui/FloatingAddButton";
 import ContentWrapper from "@/components/ContentWrapper"
 import TextIcon from "@/components/ui/TextIcon";
 import { Link } from "react-router-dom";

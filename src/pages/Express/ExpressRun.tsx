@@ -1,6 +1,6 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
-import { Button as ShadButton } from '@/components/ui/button';
+import { Button as ShadButton } from '@/components/ui/Button';
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import { useNavigate } from 'react-router-dom';
 import { TextInput } from '@/components/Elements/TextInput';

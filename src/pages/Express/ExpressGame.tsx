@@ -9,7 +9,7 @@ import usePageTitle from '@/hooks/usePageTitle'
 
 // components
 import ContentWrapper from "@/components/ContentWrapper";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 
 // queries
 import { usePlayLogs } from '@/queries/playLogQueries';

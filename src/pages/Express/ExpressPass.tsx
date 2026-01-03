@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { SelectInput } from '@/components/Elements/SelectInput';
 import ToggleButton from '@/components/Elements/ToggleButton';
 import es from '@/services/expressService';
-import { Button as ShadButton } from '@/components/ui/button';
+import { Button as ShadButton } from '@/components/ui/Button';
 
 export default function ExpressPass() {
   const {

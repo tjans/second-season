@@ -3,7 +3,7 @@ import ContentWrapper from "@/components/ContentWrapper";
 import useExpressGameTools from '@/hooks/useExpressGameTools';
 import { useTeamStats } from '@/queries/expressTeamStatQueries';
 import { ExpressTeamStat } from '@/types/ExpressTeamStats';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { useMemo } from 'react';
 
 export default function ExpressStats() {
