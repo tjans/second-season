@@ -1,19 +1,27 @@
 import { useAllTeams } from "@/queries/teamQueries";
 import FloatingAddButton from "@/components/ui/floatingAddButton";
+import ContentWrapper from "@/components/ContentWrapper"
+import TextIcon from "@/components/ui/TextIcon";
+import { Link } from "react-router-dom";
 
 const TeamsHome = () => {
     const teamsQuery = useAllTeams();
 
     return (
-        <div>
-            <h1>Teams</h1>
-            <FloatingAddButton to="/teams/new" />
-            <ul>
+        <ContentWrapper align="center">
+            <div>
+                <FloatingAddButton to="/teams/0" />
                 {teamsQuery.data?.map(team => (
-                    <li key={team.teamId}>{team.city} ({team.abbreviation})</li>
+                    <div className="mb-4 flex gap-4 items-center" key={team.teamId}>
+                        <TextIcon text={""} settings={{ textColor: '#000', color: '#ECECEC' }} />
+                        <Link to={`/teams/${team.teamId}`}>{team.city} {team.mascot} ({team.abbreviation})</Link>
+                    </div>
                 ))}
-            </ul>
-        </div>
+
+
+
+            </div>
+        </ContentWrapper>
     );
 };
 
