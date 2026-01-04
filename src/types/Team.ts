@@ -4,6 +4,7 @@ export type Team = {
     mascot: string;
     stadium: string | null;
     abbreviation: string;
+    prefix: string;
     finders: {
         rushingIn: Finder[];
         rushingOut: Finder[];

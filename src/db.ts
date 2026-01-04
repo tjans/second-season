@@ -160,7 +160,8 @@ async function seedIfEmpty() {
       mascot: "Home Mascot",
       stadium: "Home Stadium",
       abbreviation: "HOME",
-      finders: makeFinders(homePlayers)
+      finders: makeFinders(homePlayers),
+      prefix: "2026"
     };
 
     const awayTeam: Team = {
@@ -169,7 +170,8 @@ async function seedIfEmpty() {
       mascot: "Away Mascot",
       stadium: "Away Stadium",
       abbreviation: "AWAY",
-      finders: makeFinders(awayPlayers)
+      finders: makeFinders(awayPlayers),
+      prefix: "2026"
     };
 
     await db.transaction("rw", db.expressGames, db.teams, db.players, async () => {

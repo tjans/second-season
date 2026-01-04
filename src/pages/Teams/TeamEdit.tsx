@@ -18,9 +18,11 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
+import RI from '@/components/ui/requiredIndicator';
 
 // Zod schema for form validation
 const team = z.object({
+    prefix: z.string().optional(),
     city: z.string().min(1, "City is required"),
     abbreviation: z.string().min(1, "Abbreviation is required").max(4, "Abbreviation must be at most 4 characters"),
     mascot: z.string().optional(),
@@ -38,10 +40,11 @@ export default function TeamEdit() {
     const form = useForm<teamType>({
         resolver: zodResolver(team),
         defaultValues: {
+            prefix: "",
             city: "",
             abbreviation: "",
             mascot: "",
-        } as teamType,
+        },
     });
 
     const onSubmit: SubmitHandler<teamType> = (data) => {
@@ -56,26 +59,10 @@ export default function TeamEdit() {
 
                         <FormField
                             control={form.control}
-                            name="city"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>City</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}>
-                        </FormField>
-
-                        <FormField
-                            control={form.control}
                             name="abbreviation"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Abbreviation</FormLabel>
+                                    <FormLabel>Abbreviation <RI /></FormLabel>
                                     <FormControl>
                                         <Input {...field} maxLength={4} />
                                     </FormControl>
@@ -86,6 +73,63 @@ export default function TeamEdit() {
                                 </FormItem>
                             )}>
                         </FormField>
+
+                        <FormField
+                            control={form.control}
+                            name="city"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>City/Location <RI /></FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Team city or location, e.g. "Springfield"
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}>
+                        </FormField>
+
+                        <FormField
+                            control={form.control}
+                            name="prefix"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Prefix</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} maxLength={4} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Team prefix, usually the season year, e.g. 2026
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}>
+                        </FormField>
+
+                        <FormField
+                            control={form.control}
+                            name="mascot"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Mascot/Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Team mascot or name, e.g. "Tigers"
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}>
+                        </FormField>
+
+
 
                         <Button type="submit">Submit</Button>
 

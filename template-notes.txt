@@ -1,0 +1,13 @@
+year: z.preprocess(
+        (val) => {
+            if (val === "" || val === null || val === undefined) return undefined;
+            return Number(val);
+        },
+        z.number({
+            message: "Year must be a valid number"
+        })
+            .refine((n) => !isNaN(n), { message: "Year must be a valid number" })
+            .int("Year must be an integer")
+            .positive("Year must be positive")
+            .optional()
+    ),
