@@ -1,6 +1,8 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 
+import { useParams } from 'react-router-dom';
+
 // Form handling and validation
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +37,7 @@ type teamType = z.infer<typeof team>;
 // Begin component -----------------------------------------
 export default function TeamEdit() {
     usePageTitle("");
+    const { teamId } = useParams();
 
     // Set the resolver
     const form = useForm<teamType>({
@@ -49,6 +52,14 @@ export default function TeamEdit() {
 
     const onSubmit: SubmitHandler<teamType> = (data) => {
         console.log(data)
+
+        // upsert the data
+        // first determine if we are editing or creating new.  an ID of 0 means new.
+        if (teamId != "0") {
+            console.log("Editing team:", teamId);
+        } else {
+            console.log("Creating new team");
+        }
     }
 
     return (
@@ -132,6 +143,7 @@ export default function TeamEdit() {
 
 
                         <Button type="submit">Submit</Button>
+                        <Button to={"/teams"} variant="ghost" className="">Cancel</Button>
 
                     </form>
                 </Form>
