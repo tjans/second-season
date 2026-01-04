@@ -1,7 +1,7 @@
 import teamService from "@/services/teamService";
 import { Team } from "@/types/Team";
 import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 // #region Keys
 export const teamKeys = {
@@ -25,3 +25,22 @@ export const useAllTeams = (options?: SafeQueryOptionsFor<Team[]>) =>
     queryFn: () => teamService.getTeams(),
     ...options
   })
+
+// #region Mutations
+export const useSaveTeam = () => {
+  const queryClient = useQueryClient(); // Use the existing query client from context
+
+  return useMutation({
+    mutationFn: async (team: Team) => {
+      team.teamId = team.teamId || crypto.randomUUID();
+      await teamService.saveTeam(team);
+      return team.teamId;
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate all queries that start with [team]
+      queryClient.invalidateQueries({
+        queryKey: teamKeys.team(variables.teamId ?? ""),
+      });
+    }
+  });
+}

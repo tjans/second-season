@@ -1,12 +1,15 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 // Form handling and validation
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
+// Queries
+import { useTeam, useSaveTeam } from '@/queries/teamQueries';
 
 // UI components
 import { Button } from "@/components/ui/Button";
@@ -34,32 +37,53 @@ const team = z.object({
 type teamType = z.infer<typeof team>;
 
 
-// Begin component -----------------------------------------
+/************************************************************************************* 
+*   A component for editing and creating teams
+*   Handles both new team creation and existing team editing based on the presence of 
+*   a teamId param
+**************************************************************************************/
 export default function TeamEdit() {
     usePageTitle("");
+
+    const saveTeamMutation = useSaveTeam();
+    const navigate = useNavigate();
     const { teamId } = useParams();
+
+    // Form definitions
+    const emptyTeam: teamType = {
+        prefix: "",
+        city: "",
+        abbreviation: "",
+        mascot: "",
+    }
+
+    const isEdit = !!teamId;
+    const teamQuery = useTeam(teamId || "", { enabled: isEdit });
 
     // Set the resolver
     const form = useForm<teamType>({
         resolver: zodResolver(team),
-        defaultValues: {
-            prefix: "",
-            city: "",
-            abbreviation: "",
-            mascot: "",
-        },
+        defaultValues: isEdit
+            ? {
+                prefix: teamQuery.data?.prefix || "",
+                city: teamQuery.data?.city || "",
+                abbreviation: teamQuery.data?.abbreviation || "",
+                mascot: teamQuery.data?.mascot || "",
+            } : emptyTeam
     });
+    // End form definitions
+
 
     const onSubmit: SubmitHandler<teamType> = (data) => {
         console.log(data)
 
-        // upsert the data
-        // first determine if we are editing or creating new.  an ID of 0 means new.
-        if (teamId != "0") {
-            console.log("Editing team:", teamId);
-        } else {
-            console.log("Creating new team");
+        const teamToSave = {
+            teamId: teamId || undefined,
+            ...data
         }
+
+        saveTeamMutation.mutate(teamToSave);
+        navigate("/teams");
     }
 
     return (

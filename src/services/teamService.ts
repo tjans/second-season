@@ -10,5 +10,8 @@ export default {
     getTeams: async (): Promise<Team[]> => {
         let teams = await db.teams.toArray();
         return teams;
+    },
+    saveTeam: async (team: Team): Promise<void> => {
+        await db.teams.put(team);
     }
 }

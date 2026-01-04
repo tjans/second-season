@@ -67,7 +67,9 @@ const router = createBrowserRouter(
         <Route path="/express/game/:gameId/stats" element={<ExpressStats />} />
 
         <Route path="/teams" element={<TeamsHome />} />
-        <Route path="/teams/:teamId" element={<TeamEdit />} />
+
+        <Route path="/teams/:teamId/edit" element={<TeamEdit />} />
+        <Route path="/teams/new" element={<TeamEdit />} />
 
         <Route path="/members" element={<Members />} />
 

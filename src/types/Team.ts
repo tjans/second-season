@@ -1,11 +1,11 @@
 export type Team = {
-    teamId: string;
+    teamId?: string;
     city: string;
-    mascot: string;
-    stadium: string | null;
+    mascot?: string;
+    stadium?: string | null;
     abbreviation: string;
-    prefix: string;
-    finders: {
+    prefix?: string;
+    finders?: {
         rushingIn: Finder[];
         rushingOut: Finder[];
         shortPass: Finder[];
