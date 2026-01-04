@@ -37,9 +37,13 @@ export const useSaveTeam = () => {
       return team.teamId;
     },
     onSuccess: (_data, variables) => {
-      // Invalidate all queries that start with [team]
+      const teamId = variables.teamId || "";
+
+      // Update the specific team query data
+      queryClient.setQueryData(teamKeys.team(teamId), variables);
+
       queryClient.invalidateQueries({
-        queryKey: teamKeys.team(variables.teamId ?? ""),
+        queryKey: teamKeys.teamList(),
       });
     }
   });
