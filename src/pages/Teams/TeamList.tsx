@@ -12,9 +12,14 @@ const TeamsHome = () => {
             <div>
                 <FloatingAddButton to="/teams/new" />
                 {teamsQuery.data?.map(team => (
-                    <div className="mb-4 flex gap-4 items-center" key={team.teamId}>
-                        <TextIcon text={""} settings={{ textColor: '#000', color: '#ECECEC' }} />
-                        <Link to={`/teams/${team.teamId}/edit`}>{team.city} {team.mascot} ({team.abbreviation})</Link>
+                    <div key={team.teamId}>
+                        <div className="mb-4 flex gap-4 items-center" key={team.teamId}>
+                            <div><TextIcon text={""} settings={{ textColor: '#000', color: '#ECECEC' }} /></div>
+                            <div className="text-start">
+                                <Link to={`/teams/${team.teamId}/edit`}>{team.prefix ?? "    "} {team.city} {team.mascot} ({team.abbreviation})</Link>
+                                <div>Roster</div>
+                            </div>
+                        </div>
                     </div>
                 ))}
 

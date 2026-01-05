@@ -9,6 +9,11 @@ export default {
     },
     getTeams: async (): Promise<Team[]> => {
         let teams = await db.teams.toArray();
+        teams.sort((a, b) => {
+            if (a.prefix !== b.prefix) return (a.prefix ?? "").localeCompare(b.prefix ?? "");
+            if (a.city !== b.city) return a.city.localeCompare(b.city);
+            return (a.mascot ?? "").localeCompare(b.mascot ?? "");
+        });
         return teams;
     },
     saveTeam: async (team: Team): Promise<void> => {

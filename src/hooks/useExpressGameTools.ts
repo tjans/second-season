@@ -1,7 +1,7 @@
 import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
 import { useSaveTeamStats } from "@/queries/expressTeamStatQueries";
 import { useLogPlay } from "@/queries/playLogQueries";
-import { useTeam } from "@/queries/teamQueries";
+import { useSuspenseTeam } from "@/queries/teamQueries";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -13,8 +13,8 @@ const useExpressGameTools = () => {
     const game = useExpressGame(gameId, { staleTime: Infinity });
     if (!game.data) throw new Error("game data is required");
 
-    const homeTeam = useTeam(game.data?.homeTeamId || "", { staleTime: Infinity });
-    const awayTeam = useTeam(game.data?.awayTeamId || "", { staleTime: Infinity });
+    const homeTeam = useSuspenseTeam(game.data?.homeTeamId || "", { staleTime: Infinity });
+    const awayTeam = useSuspenseTeam(game.data?.awayTeamId || "", { staleTime: Infinity });
     const saveGameMutation = useSaveGame();
     const logPlayMutation = useLogPlay();
     const undoMutation = useUndo();

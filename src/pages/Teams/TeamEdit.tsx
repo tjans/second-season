@@ -27,7 +27,7 @@ import RI from '@/components/ui/requiredIndicator';
 
 // Zod schema for form validation
 const team = z.object({
-    prefix: z.string().optional(),
+    prefix: z.string().min(1, "Prefix is required"),
     city: z.string().min(1, "City is required"),
     abbreviation: z.string().min(1, "Abbreviation is required").max(4, "Abbreviation must be at most 4 characters"),
     mascot: z.string().optional(),

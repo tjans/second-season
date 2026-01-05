@@ -1,7 +1,7 @@
 import teamService from "@/services/teamService";
 import { Team } from "@/types/Team";
 import { SafeQueryOptionsFor } from "@/types/SafeQueryOptions";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 
 // #region Keys
 export const teamKeys = {
@@ -12,8 +12,15 @@ export const teamKeys = {
 // #endregion
 
 //#region Query options
-export const useTeam = (teamId: string, options?: SafeQueryOptionsFor<Team>) =>
+export const useSuspenseTeam = (teamId: string, options?: SafeQueryOptionsFor<Team>) =>
   useSuspenseQuery({
+    queryKey: teamKeys.team(teamId),
+    queryFn: () => teamService.getTeam(teamId),
+    ...options
+  })
+
+export const useTeam = (teamId: string, options?: SafeQueryOptionsFor<Team>) =>
+  useQuery({
     queryKey: teamKeys.team(teamId),
     queryFn: () => teamService.getTeam(teamId),
     ...options

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button';
 import { useMemo } from 'react';
 
 export default function ExpressStats() {
-  console.log('Rendering ExpressStats component');
   const { gameId, homeTeam, awayTeam, gameUrl } = useExpressGameTools();
   const homeTeamStats = useTeamStats(gameId, homeTeam.teamId);
   const awayTeamStats = useTeamStats(gameId, awayTeam.teamId);
