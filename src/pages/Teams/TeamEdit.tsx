@@ -7,6 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useEffect } from 'react';
 
 // Queries
 import { useTeam, useSaveTeam } from '@/queries/teamQueries';
@@ -63,14 +64,20 @@ export default function TeamEdit() {
     // Set the resolver
     const form = useForm<teamType>({
         resolver: zodResolver(team),
-        defaultValues: isEdit
-            ? {
-                prefix: teamQuery.data?.prefix || "",
-                city: teamQuery.data?.city || "",
-                abbreviation: teamQuery.data?.abbreviation || "",
-                mascot: teamQuery.data?.mascot || "",
-            } : emptyTeam
+        defaultValues: emptyTeam
     });
+
+    // Update form when data is loaded
+    useEffect(() => {
+        if (teamQuery.data) {
+            form.reset({
+                prefix: teamQuery.data.prefix || "",
+                city: teamQuery.data.city || "",
+                abbreviation: teamQuery.data.abbreviation || "",
+                mascot: teamQuery.data.mascot || "",
+            });
+        }
+    }, [teamQuery.data, form]);
     // End form definitions
 
 
