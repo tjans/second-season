@@ -27,6 +27,13 @@ export const useTeam = (teamId: string, options?: SafeQueryOptionsFor<Team>) =>
   })
 
 export const useAllTeams = (options?: SafeQueryOptionsFor<Team[]>) =>
+  useQuery({
+    queryKey: teamKeys.teamList(),
+    queryFn: () => teamService.getTeams(),
+    ...options
+  })
+
+export const useSuspenseAllTeams = (options?: SafeQueryOptionsFor<Team[]>) =>
   useSuspenseQuery({
     queryKey: teamKeys.teamList(),
     queryFn: () => teamService.getTeams(),

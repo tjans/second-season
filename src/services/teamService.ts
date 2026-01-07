@@ -18,5 +18,13 @@ export default {
     },
     saveTeam: async (team: Team): Promise<void> => {
         await db.teams.put(team);
+    },
+    createTeamLookup: (teams: Team[]): Record<string, Team> => {
+        return teams.reduce<Record<string, Team>>((lookup, team) => {
+            if (team.teamId !== undefined) {
+                lookup[team.teamId] = team;
+            }
+            return lookup;
+        }, {});
     }
 }

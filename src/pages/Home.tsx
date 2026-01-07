@@ -25,7 +25,6 @@ export default function Home() {
   return (
     <>
       <ContentWrapper>
-        <Link to={"/express/game/game-id-1"}>View Express Game</Link><br />
         <Link to={"/teams"}>Teams</Link> <br />
         <Link to={"/games"}>Games</Link>
 

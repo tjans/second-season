@@ -4,6 +4,12 @@ import playLogService from './playLogService';
 import expressTeamStatService from './expressTeamStatService';
 
 export default {
+    getGames: async (): Promise<ExpressGame[]> => {
+        let games = await db.expressGames.toArray();
+        if (!games) throw new Error(`No games found`);
+        return games;
+    },
+
     getGame: async (gameId: string): Promise<ExpressGame> => {
         let game = await db.expressGames.where({ gameId }).first();
         if (!game) throw new Error(`Game with id ${gameId} not found`);
