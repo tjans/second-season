@@ -1,4 +1,4 @@
-import { useExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
+import { useSuspenseExpressGame, useSaveGame, useUndo } from "@/queries/expressGameQueries";
 import { useSaveTeamStats } from "@/queries/expressTeamStatQueries";
 import { useLogPlay } from "@/queries/playLogQueries";
 import { useSuspenseTeam } from "@/queries/teamQueries";
@@ -10,7 +10,7 @@ const useExpressGameTools = () => {
     const { gameId } = useParams<{ gameId: string }>();
     if (!gameId) throw new Error("gameId is required");
 
-    const game = useExpressGame(gameId, { staleTime: Infinity });
+    const game = useSuspenseExpressGame(gameId, { staleTime: Infinity });
     if (!game.data) throw new Error("game data is required");
 
     const homeTeam = useSuspenseTeam(game.data?.homeTeamId || "", { staleTime: Infinity });

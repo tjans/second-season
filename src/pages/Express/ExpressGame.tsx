@@ -39,7 +39,7 @@ export default function ExpressGame() {
   usePageTitle("Express Gameday");
 
   // functions
-  const handleCoinFlip = (receivingTeamId: string) => {
+  const handleCoinFlip = (receivingTeamId: string | undefined) => {
     let kickingTeam = receivingTeamId == awayTeam.teamId ? homeTeam : awayTeam;
     let receivingTeam = receivingTeamId == awayTeam.teamId ? awayTeam : homeTeam;
 
@@ -208,7 +208,7 @@ export default function ExpressGame() {
           </div>
         }
 
-        {game.situation.mode == "PREGAME" &&
+        {game.situation.mode == "PREGAME" && awayTeam && homeTeam &&
           <>
             <div className="text-center font-bold mb-4">Who will receive?</div>
             <div className="mb-4 flex justify-center items-center gap-2">

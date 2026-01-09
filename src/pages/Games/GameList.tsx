@@ -1,7 +1,7 @@
 import usePageTitle from '@/hooks/usePageTitle'
 import ContentWrapper from "@/components/ContentWrapper";
 import { useGames } from "@/queries/expressGameQueries";
-import Debug from '@/components/Debug';
+import { LuPencil } from "react-icons/lu";
 import { useAllTeams } from '@/queries/teamQueries';
 import teamService from '@/services/teamService';
 import { Team } from '@/types/Team';
@@ -47,7 +47,10 @@ export default function GameList() {
                 })}
 
 
-
+                {/* Bottom-Right Corner */}
+                <div className="fixed bottom-24 right-4 bg-blue-500 rounded-2xl p-4 shadow-lg hover:bg-blue-600 transition-colors">
+                    <Link to="/games/new"><LuPencil className="text-2xl text-white drop-shadow-md" /></Link>
+                </div>
             </ContentWrapper>
         </>
     );

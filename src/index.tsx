@@ -52,6 +52,7 @@ import TeamList from "./pages/Teams/TeamList";
 import RosterList from "./pages/Teams/RosterList";
 
 import GameList from "./pages/Games/GameList";
+import GameEdit from "./pages/Games/GameEdit";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -69,13 +70,16 @@ const router = createBrowserRouter(
         <Route path="/express/game/:gameId/pat" element={<ExpressPat />} />
         <Route path="/express/game/:gameId/stats" element={<ExpressStats />} />
 
-
+        {/* Team Routes */}
         <Route path="/teams" element={<TeamList />} />
         <Route path="/teams/new" element={<TeamEdit />} />
         <Route path="/teams/:teamId/edit" element={<TeamEdit />} />
         <Route path="/teams/:teamId/roster" element={<RosterList />} />
 
+        {/* Game Routes */}
         <Route path="/games" element={<GameList />} />
+        <Route path="/games/new" element={<GameEdit />} />
+        <Route path="/games/:gameId/edit" element={<GameEdit />} />
 
         <Route path="/members" element={<Members />} />
 

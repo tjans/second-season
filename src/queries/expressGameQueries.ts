@@ -14,6 +14,13 @@ export const expressGameKeys = {
 
 //#region Query options
 export const useExpressGame = (gameId: string, options?: SafeQueryOptionsFor<ExpressGame>) =>
+    useQuery({
+        queryKey: expressGameKeys.expressGame(gameId),
+        queryFn: () => expressGameService.getGame(gameId),
+        ...options
+    })
+
+export const useSuspenseExpressGame = (gameId: string, options?: SafeQueryOptionsFor<ExpressGame>) =>
     useSuspenseQuery({
         queryKey: expressGameKeys.expressGame(gameId),
         queryFn: () => expressGameService.getGame(gameId),
